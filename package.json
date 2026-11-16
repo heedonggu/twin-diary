@@ -1,0 +1,14 @@
+{
+  "name": "twin-diary",
+  "version": "1.0.0",
+  "description": "노션·구글 캘린더 연동 디지털 다이어리 (클로드 아티팩트 / PWA)",
+  "scripts": {
+    "test": "node test/e2e.mjs"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "type": "commonjs",
+  "devDependencies": {
+    "playwright": "^1.65.1"
+  },
+  "private": true
+}

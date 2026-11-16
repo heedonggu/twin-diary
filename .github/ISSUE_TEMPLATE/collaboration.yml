@@ -1,0 +1,39 @@
+name: 협업 제안(상업적 이용·상품화)
+description: 트윈 다이어리를 상업적으로 쓰거나 상품화하려면 여기로
+title: "[협업 제안] "
+labels: [collaboration]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        트윈 다이어리의 상업적 이용·상품화는 허락이 필요합니다(COMMERCIAL.md).
+        협업을 제안하거나, 먼저 기여(코드·디자인·번역·시험)한 뒤 조건을 합의해 주세요.
+        연락처는 공개 이슈에 적지 말고, 검토 후 비공개로 주고받습니다.
+  - type: input
+    id: org
+    attributes:
+      label: 회사·단체 이름
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: 이용 방식
+      options:
+        - 회사 내부 사용
+        - 고객에게 판매·구독 제공
+        - 제품에 포함·재판매
+        - 공동 개발
+        - 기타
+    validations:
+      required: true
+  - type: textarea
+    id: plan
+    attributes:
+      label: 쓰려는 방식과 규모
+    validations:
+      required: true
+  - type: textarea
+    id: contribute
+    attributes:
+      label: 함께 할 수 있는 부분(개발, 디자인, 번역, 시험 등)
