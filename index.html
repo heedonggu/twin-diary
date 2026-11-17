@@ -25,10 +25,10 @@ button{cursor:pointer}
 .tabs button{writing-mode:vertical-rl;letter-spacing:.18em;font-size:10px;padding:12px 6px;border:1px solid var(--line);border-left:0;background:var(--paper);color:var(--mute);border-radius:0 5px 5px 0;min-height:58px}
 .tabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 .tabs .sp{flex:1}
-.ph{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;border-bottom:1.5px solid var(--ink);padding-bottom:6px;margin-bottom:14px;min-height:42px}
+.ph{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px;border-bottom:1.5px solid var(--ink);padding-bottom:6px;margin-bottom:14px;min-height:42px}
 .ph h1{margin:0;font-size:24px;font-weight:800;letter-spacing:-.02em;line-height:1.1}
 .ph h1 small{font-size:12px;color:var(--mute);font-weight:400;margin-left:6px;letter-spacing:0}
-.nav{display:flex;gap:4px;align-items:center;font-size:10px;letter-spacing:.14em;color:var(--mute);white-space:nowrap}
+.nav{display:flex;flex-wrap:wrap;gap:4px;align-items:center;font-size:10px;letter-spacing:.14em;color:var(--mute);white-space:nowrap}
 .nav button,.lnk{border:0;background:none;padding:8px 6px;color:var(--mute);font-size:10px;letter-spacing:.14em}
 .nav button:hover,.lnk:hover{color:var(--ink)}
 .lbl{font-size:10px;letter-spacing:.16em;color:var(--mute);text-transform:uppercase;margin:16px 0 4px;display:flex;justify-content:space-between;align-items:center}
@@ -89,8 +89,8 @@ textarea:focus,.in:focus{border-bottom-color:var(--ink)}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
 .stats div b{display:block;font-size:22px}
 .stats div span{font-size:10px;color:var(--mute)}
-.heat{display:grid;grid-template-columns:28px repeat(31,1fr);gap:2px;font-size:8px;color:var(--mute)}
-.heat i{aspect-ratio:1;background:var(--soft);border-radius:2px;display:block}
+.heat{display:grid;grid-template-columns:24px repeat(31,minmax(0,1fr));gap:2px;font-size:8px;color:var(--mute)}
+.heat>*{min-width:0;overflow:hidden;white-space:nowrap}.heat i{aspect-ratio:1;background:var(--soft);border-radius:2px;display:block}
 .hg{width:100%;border-collapse:collapse;font-size:10px;table-layout:fixed}
 .hg th,.hg td{border-bottom:1px solid var(--soft);text-align:center;padding:0;height:30px}
 .hg th.nm,.hg td.nm{text-align:left;width:96px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:4px;cursor:pointer}
@@ -127,8 +127,9 @@ textarea:focus,.in:focus{border-bottom-color:var(--ink)}
   .page{overflow:visible;padding:16px 14px 18px}
   .page.r{border-left:0;box-shadow:none;border-top:6px solid #ece8df}
   .tabs{position:fixed;left:0;right:0;bottom:0;flex-direction:row;padding:6px 6px calc(6px + env(safe-area-inset-bottom));gap:2px;background:var(--paper);border-top:1px solid var(--line);overflow-x:auto;z-index:20}
-  .tabs button{writing-mode:horizontal-tb;border:0;border-radius:4px;min-height:44px;flex:1 1 auto;padding:4px 5px;letter-spacing:.02em}
+  .tabs button{writing-mode:horizontal-tb;border:0;border-radius:4px;min-height:44px;flex:1 1 0;min-width:0;padding:4px 2px;letter-spacing:.02em;overflow:hidden;white-space:nowrap}
   .tabs .sp{display:none}
+  @media (max-width:359px){.book{padding-bottom:calc(88px + env(safe-area-inset-bottom))}.tabs{display:grid;grid-template-columns:repeat(4,1fr);row-gap:2px}.tabs button{min-height:34px;padding:2px 0;letter-spacing:0}}
   .cal .c{min-height:58px;padding:2px}
   .ev{font-size:9.5px}
   .yr{grid-template-columns:1fr}
@@ -141,8 +142,10 @@ textarea:focus,.in:focus{border-bottom-color:var(--ink)}
   #app{flex-direction:column}
   .book{margin:0;border-radius:0;grid-template-columns:env(viewport-segment-width 0 0) env(viewport-segment-width 1 0);column-gap:calc(env(viewport-segment-left 1 0) - env(viewport-segment-right 0 0));padding-bottom:calc(60px + env(safe-area-inset-bottom))}
   .page.r{box-shadow:none}
-  .tabs{position:fixed;left:0;right:0;bottom:0;flex-direction:row;padding:6px;background:var(--paper);border-top:1px solid var(--line);z-index:20}
-  .tabs button{writing-mode:horizontal-tb;border-radius:4px;min-height:44px;flex:1}
+  .tabs{position:fixed;left:0;right:0;bottom:0;display:grid;padding:6px 0;gap:0;background:var(--paper);border-top:1px solid var(--line);z-index:20;
+    grid-template-columns:repeat(4,calc(env(viewport-segment-width 0 0) / 4)) calc(env(viewport-segment-left 1 0) - env(viewport-segment-right 0 0)) repeat(4,calc(env(viewport-segment-width 1 0) / 4))}
+  .tabs button{writing-mode:horizontal-tb;border-radius:4px;min-height:44px;margin:0 3px;min-width:0;letter-spacing:.06em}
+  .tabs>button:nth-child(-n+4){order:0}.tabs .sp{order:1;display:block}.tabs>button:nth-child(n+5){order:2}
 }
 @media (vertical-viewport-segments:2){
   .book{grid-template-columns:1fr;grid-template-rows:env(viewport-segment-height 0 0) env(viewport-segment-height 0 1);row-gap:calc(env(viewport-segment-top 0 1) - env(viewport-segment-bottom 0 0))}
@@ -182,23 +185,41 @@ function setPath(o,p,v){const ks=p.split(".");let a=o;ks.slice(0,-1).forEach((k,
    Artifact (claude.ai): per-person private db  → every device signed in to Claude sees the same diary.
    Standalone (GitHub Pages / PWA): this browser's localStorage + JSON backup file. */
 const LS="twd:";
-const S={mode:"local",cache:{},timers:{},inflight:{},pend:{},col:null,
+/* Writes are per field ("sub" = first path segment, e.g. one day of a month doc) so two devices
+   editing different days of the same month never overwrite each other. */
+const S={mode:"local",cache:{},timers:{},inflight:{},pend:{},subs:{},fail:{},known:new Set(),col:null,
   get(k,def){if(!(k in this.cache))this.cache[k]=def===undefined?{}:JSON.parse(JSON.stringify(def));return this.cache[k]},
-  has(k){return k in this.cache},
-  save(k,ms=500){clearTimeout(this.timers[k]);this.timers[k]=setTimeout(()=>{delete this.timers[k];this.flush(k)},ms)},
+  mark(k,sub){if(this.subs[k]==="all")return;if(sub==null){this.subs[k]="all";return}(this.subs[k]||(this.subs[k]=new Set())).add(String(sub))},
+  save(k,ms=500,sub){this.mark(k,sub);clearTimeout(this.timers[k]);this.timers[k]=setTimeout(()=>{delete this.timers[k];this.flush(k)},ms);saveStatus()},
   async flush(k){
     if(this.inflight[k]){this.pend[k]=1;return}
-    this.inflight[k]=1;
+    const subs=this.subs[k];delete this.subs[k];this.inflight[k]=1;saveStatus();
     try{
-      if(this.mode==="db")await this.col.doc(k).set(this.cache[k]);
+      if(this.mode==="db"){const ref=this.col.doc(k);
+        if(subs&&subs!=="all"&&this.known.has(k)){const patch={};for(const f of subs)patch[f]=this.cache[k][f]===undefined?null:this.cache[k][f];
+          try{await ref.update(patch)}catch(e){if(e&&e.code==="invalid_argument")await ref.set(this.cache[k]);else throw e}}
+        else await ref.set(this.cache[k]);
+        this.known.add(k)}
       else localStorage.setItem(LS+k,JSON.stringify(this.cache[k]));
-    }catch(e){toast(e&&e.name==="QuotaExceededError"?"이 기기 저장 공간이 가득 찼어요. 사진을 줄이거나 백업 후 정리하세요.":"저장 실패: "+(e.code||e.message||e))}
+      this.fail[k]=0;
+    }catch(e){
+      if(!subs||subs==="all")this.mark(k);else subs.forEach(f=>this.mark(k,f));
+      this.fail[k]=(this.fail[k]||0)+1;
+      toast(e&&e.name==="QuotaExceededError"?"이 기기 저장 공간이 가득 찼어요. 사진을 줄이거나 백업 후 정리하세요.":"저장 실패, 다시 시도해요: "+(e.code||e.message||e));
+      if(this.fail[k]<5)this.save(k,3000*this.fail[k]);
+    }
     this.inflight[k]=0;
-    if(this.pend[k]){this.pend[k]=0;this.flush(k)}
+    if(this.pend[k]){this.pend[k]=0;await this.flush(k)}
+    saveStatus();
   },
+  flushAll(){for(const k of Object.keys(this.timers)){clearTimeout(this.timers[k]);delete this.timers[k];this.flush(k)}},
   keys(){return Object.keys(this.cache)},
-  busy(k){return !!(this.timers[k]||this.inflight[k])}
+  busy(k){return !!(this.timers[k]||this.inflight[k]||this.subs[k])}
 };
+function saveStatus(){const ks=Object.keys(S.cache);const failing=ks.some(k=>S.fail[k]),busy=ks.some(k=>S.busy(k));
+  const t=failing?"저장 실패 — 다시 시도 중":busy?"저장 중…":"저장됨";document.querySelectorAll(".sstat").forEach(e=>{e.textContent=t;e.dataset.state=failing?"fail":busy?"busy":"ok"})}
+addEventListener("pagehide",()=>S.flushAll());
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")S.flushAll()});
 function loadLocal(){const o={};try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k.startsWith(LS))o[k.slice(LS.length)]=JSON.parse(localStorage.getItem(k))}}catch(e){}return o}
 
 /* ================= state ================= */
@@ -212,7 +233,6 @@ const NOTION="Notion",GCAL="Google Calendar";
 /* ================= data helpers ================= */
 const dayDoc=ds=>S.get("d-"+ds.slice(0,7),{});
 const day=ds=>{const m=dayDoc(ds),k=ds.slice(8);return m[k]||(m[k]={})};
-const touchDay=ds=>{S.save("d-"+ds.slice(0,7));markUnsaved("d:"+ds)};
 const monthDoc=k=>S.get("m-"+k,{goals:[],periodLog:"",keywords:{}});
 const photos=k=>S.get("p-"+k,{});
 const weekStart=d=>{const ws=cfg().weekStart;return addDays(d,-((d.getDay()-ws+7)%7))};
@@ -222,9 +242,9 @@ const weekNo=d=>isoWeek(addDays(weekStart(d),cfg().weekStart===0?1:0))[1];
 const habits=()=>S.get("habits",{list:[],log:{}});
 const notesDoc=y=>S.get("n-"+y,{list:[]});
 const localEv=k=>S.get("ev-"+k,{list:[]});
-const hasDiary=ds=>{const d=dayDoc(ds)[ds.slice(8)];return !!d&&Object.entries(d).some(([k,v])=>k!=="ns"&&(Array.isArray(v)?v.length:v))};
-const unsaved=new Set();
-function markUnsaved(key){if(cfg().notion){unsaved.add(key);const el=$("#nstat");if(el)el.textContent="노션에 저장 안 됨"}}
+const hasDiary=ds=>{const d=dayDoc(ds)[ds.slice(8)];return !!d&&Object.entries(d).some(([k,v])=>k!=="ns"&&k!=="ed"&&(Array.isArray(v)?v.length:v))};
+const isUnsaved=ds=>{const d=dayDoc(ds)[ds.slice(8)];return !!(cfg().notion&&d&&d.ed&&(!d.ns||d.ed>d.ns))};
+function markUnsaved(ds){day(ds).ed=new Date().toISOString();S.save("d-"+ds.slice(0,7),500,ds.slice(8));const el=$("#nstat");if(el&&cfg().notion)el.textContent="노션에 저장 안 됨"}
 
 /* ================= Google Calendar (artifact connector) ================= */
 const gc={byDate:{},watches:{},order:[],err:null};
@@ -237,18 +257,23 @@ function ensureMonth(k){
   gc.watches[k]=MCP.watchTool(GCAL,"list_events",input,ev=>{
     if(ev.type==="error"){gc.err=ev.error;if(["needs_reauth","server_not_connected","blocked_by_policy","approval_required","not_in_manifest","selection_required"].includes(ev.error.code)){clearMonth(k)}renderSoon();return}
     gc.err=null;clearMonth(k);
-    const p=ev.result.payload||{};
-    for(const e of (p.events||[])){if(e.status==="cancelled")continue;const s=e.start||{};const ds=(s.dateTime||s.date||"").slice(0,10);if(!ds||!ds.startsWith(k))continue;
-      (gc.byDate[ds]||(gc.byDate[ds]=[])).push({id:e.id,title:e.summary||"(제목 없음)",time:s.dateTime?s.dateTime.slice(11,16):"",src:"g"})}
-    renderSoon();
+    const p=ev.result.payload||{};(p.events||[]).forEach(e=>addG(e,k));renderSoon();
+    if(p.nextPageToken)morePages(k,input,p.nextPageToken);
   },{refetchInterval:60000});
   gc.order.push(k);
   while(gc.order.length>24){const old=gc.order.shift();gc.watches[old]&&gc.watches[old]();delete gc.watches[old];clearMonth(old)}
 }
+function addG(e,k){if(!e||e.status==="cancelled")return;const s=e.start||{},en=e.end||{};let sd,ed,time="";
+  if(s.dateTime){sd=new Date(s.dateTime);if(isNaN(sd))return;time=`${pad(sd.getHours())}:${pad(sd.getMinutes())}`;const de=en.dateTime?new Date(en.dateTime):sd;ed=new Date(Math.max(sd,de-1))}
+  else if(s.date){sd=parse(s.date);ed=en.date?addDays(parse(en.date),-1):sd;if(ed<sd)ed=sd}else return;
+  const first=ymd(sd);
+  for(let d=new Date(sd.getFullYear(),sd.getMonth(),sd.getDate()),i=0;d<=ed&&i<62;d=addDays(d,1),i++){const ds=ymd(d);if(!ds.startsWith(k))continue;
+    const L=gc.byDate[ds]||(gc.byDate[ds]=[]);if(!L.some(x=>x.id===e.id))L.push({id:e.id,title:e.summary||"(제목 없음)",time:ds===first?time:"",src:"g"})}}
+async function morePages(k,input,token){for(let i=0;token&&i<8;i++){try{const r=await MCP.callTool(GCAL,"list_events",{...input,pageToken:token});const p=r.payload||{};(p.events||[]).forEach(e=>addG(e,k));token=p.nextPageToken}catch(e){gc.err=e;break}}renderSoon()}
 function clearMonth(k){for(const ds of Object.keys(gc.byDate))if(ds.startsWith(k))delete gc.byDate[ds]}
 function resetGcal(){for(const k of Object.keys(gc.watches)){gc.watches[k]();}gc.watches={};gc.order=[];gc.byDate={}}
 function eventsOn(ds){
-  const loc=localEv(ds.slice(0,7)).list.filter(e=>e.date===ds).map(e=>({...e,src:"l"}));
+  const loc=localEv(ds.slice(0,7)).list.filter(e=>e&&e.date===ds).map(e=>({...e,time:/^\d\d:\d\d$/.test(e.time||"")?e.time:"",src:"l"}));
   const g=gcOn()?(gc.byDate[ds]||[]):[];
   return [...g,...loc].sort((a,b)=>(a.time||"").localeCompare(b.time||""));
 }
@@ -259,7 +284,7 @@ async function addEvent(ds,title,time,toG){
     const input={summary:title,startTime:start,endTime:end};if(!time)input.allDay=true;if(cfg().calId)input.calendarId=cfg().calId;
     try{await MCP.callTool(GCAL,"create_event",input);toast("구글 캘린더에 추가했어요");MCP.invalidate(GCAL,"list_events").catch(()=>{})}
     catch(e){toast(mcpMsg(e,GCAL));return false}
-  }else{const k=ds.slice(0,7);localEv(k).list.push({id:uid(),date:ds,time,title});S.save("ev-"+k);toast("일정을 추가했어요")}
+  }else{const k=ds.slice(0,7);localEv(k).list.push({id:uid(),date:ds,time,title});S.save("ev-"+k,0,"list");toast("일정을 추가했어요")}
   render();return true;
 }
 function mcpMsg(e,srv){const c=e&&e.code;
@@ -288,16 +313,16 @@ const NDB={
 };
 async function notionSetup(btn){
   if(!MCP){toast("노션 연결은 클로드 아티팩트로 열었을 때 쓸 수 있어요");return}
-  btn.disabled=true;const say=t=>{btn.textContent=t};
+  btn.disabled=true;const say=t=>{btn.textContent=t};const c=cfg();
   try{
-    say("노션 페이지 만드는 중…");
-    const r=await MCP.callTool(NOTION,"notion-create-pages",{creation_mode:"draft",allow_async:false,pages:[{properties:{title:"트윈 다이어리"},content:"트윈 다이어리 앱이 쓰는 데이터베이스 5개가 이 페이지 안에 있어요."}]});
-    const page=idsFrom(r)[0];if(!page)throw{message:"노션 페이지 번호를 읽지 못했어요"};
-    const ds={};
-    for(const [k,d] of Object.entries(NDB)){say(`${d.title} 데이터베이스 만드는 중…`);
-      const rr=await MCP.callTool(NOTION,"notion-create-database",{parent:{type:"page_id",page_id:page},title:d.title,schema:d.schema});
-      ds[k]=dsFrom(rr);if(!ds[k])throw{message:d.title+" 데이터베이스 번호를 읽지 못했어요"}}
-    cfg().notion={page,ds,at:new Date().toISOString()};S.save("settings",0);toast("노션 데이터베이스 5개를 만들었어요");
+    const part=c.notionPart||(c.notionPart={page:null,ds:{}});   // progress is kept, so a retry continues where it stopped
+    if(!part.page){say("노션 페이지 만드는 중…");
+      const r=await MCP.callTool(NOTION,"notion-create-pages",{creation_mode:"draft",allow_async:false,pages:[{properties:{title:"트윈 다이어리"},content:"트윈 다이어리 앱이 쓰는 데이터베이스 5개가 이 페이지 안에 있어요."}]});
+      part.page=idsFrom(r)[0];if(!part.page)throw{message:"노션 페이지 번호를 읽지 못했어요"};S.save("settings",0)}
+    for(const [k,d] of Object.entries(NDB)){if(part.ds[k])continue;say(`${d.title} 데이터베이스 만드는 중…`);
+      const rr=await MCP.callTool(NOTION,"notion-create-database",{parent:{type:"page_id",page_id:part.page},title:d.title,schema:d.schema});
+      part.ds[k]=dsFrom(rr);if(!part.ds[k])throw{message:d.title+" 데이터베이스 번호를 읽지 못했어요"};S.save("settings",0)}
+    c.notion={page:part.page,ds:part.ds,at:new Date().toISOString()};delete c.notionPart;S.save("settings",0);toast("노션 데이터베이스 5개를 만들었어요");
   }catch(e){toast(e.code?mcpMsg(e,NOTION):("노션 연결 실패: "+(e.message||e)))}
   render();
 }
@@ -315,14 +340,14 @@ async function nUpsert(mapKey,dsKey,props,content){
   const map=NM();const id=map[mapKey];
   if(id){try{await MCP.callTool(NOTION,"notion-update-page",{page_id:id,command:"update_properties",properties:props});
       if(content!=null)await MCP.callTool(NOTION,"notion-update-page",{page_id:id,command:"replace_content",new_str:content||" "});return id}
-    catch(e){if(e.code!=="tool_error")throw e;}}
+    catch(e){if(!(e.code==="tool_error"&&/not.?found|archiv|trash|deleted|no longer|could not find|does not exist/i.test(e.message||"")))throw e;}}
   const page={properties:props};if(content)page.content=content;
   const r=await MCP.callTool(NOTION,"notion-create-pages",{parent:{type:"data_source_id",data_source_id:n.ds[dsKey]},pages:[page],allow_async:false});
   const nid=idsFrom(r,[n.ds[dsKey],n.page])[0];if(!nid)throw{message:"만든 노션 페이지 번호를 읽지 못했어요"};
-  map[mapKey]=nid;S.save("nmap",0);return nid}
+  map[mapKey]=nid;S.save("nmap",0,mapKey);return nid}
 async function saveDayNotion(ds,btn){
   if(btn)btn.disabled=true;
-  try{await nUpsert("d:"+ds,"diary",diaryProps(ds));day(ds).ns=new Date().toISOString();S.save("d-"+ds.slice(0,7));unsaved.delete("d:"+ds);toast("노션에 저장했어요")}
+  try{await nUpsert("d:"+ds,"diary",diaryProps(ds));day(ds).ns=new Date().toISOString();S.save("d-"+ds.slice(0,7),0,ds.slice(8));toast("노션에 저장했어요")}
   catch(e){toast(e.code?mcpMsg(e,NOTION):(e.message||String(e)))}
   render()}
 const autoQ={};
@@ -332,8 +357,30 @@ const syncWeek=k=>autoNotion("w:"+k,()=>nUpsert("w:"+k,"planner",plannerProps("W
 function syncHabit(h){autoNotion("h:"+h.id,()=>nUpsert("h:"+h.id,"habits",{"Name":h.name,"Icon":h.icon||"","Category":h.cat||"","date:Start:start":h.start||todayStr(),"date:Start:is_datetime":0,"On":h.on===false?"__NO__":"__YES__"}))}
 function syncHabitDay(ds){const h=habits();const done=h.list.filter(x=>h.log[x.id]&&h.log[x.id][ds]);
   autoNotion("hl:"+ds,()=>nUpsert("hl:"+ds,"habitlog",{"Title":ds,"date:Date:start":ds,"date:Date:is_datetime":0,"Done":done.map(x=>x.name).join(", "),"Count":done.length}))}
+const syncNote=n=>autoNotion("n:"+n.id,()=>nUpsert("n:"+n.id,"notes",noteProps(n),n.body||""));
+const noteProps=n=>({"Name":n.title||"(제목 없음)","date:Date:start":n.date,"date:Date:is_datetime":0,"Category":n.cat||""});
+/* Notion -> diary: rows edited in Notion come back, unless this device has newer unsaved edits for that day. */
+const pulled={};
+const NFIELD={"Wake Up":"wake","In Bed":"bed","Sleep Journal":"sleep","Morning Note":"morning","Log":"log","Joy":"joy","Tomorrow":"tomorrow","Comment":"comment"};
+function cellText(v){if(v==null)return"";if(typeof v==="string"||typeof v==="number")return String(v);if(Array.isArray(v))return v.map(cellText).join("");
+  for(const f of ["plain_text","text","content","value","name","start"])if(v[f]!=null)return cellText(v[f]);return""}
+function rowsOf(x,out=[]){if(Array.isArray(x)){x.forEach(y=>rowsOf(y,out));return out}if(x&&typeof x==="object"){const o=x.properties&&typeof x.properties==="object"?x.properties:x;
+  if("Title" in o&&("Joy" in o||"Log" in o||"date:Date:start" in o||"Date" in o))out.push(o);else Object.values(x).forEach(y=>rowsOf(y,out))}return out}
+async function pullNotionMonth(k,force){const n=cfg().notion;if(!n||!MCP||(pulled[k]&&!force))return 0;pulled[k]=1;const[y,m]=k.split("-").map(Number);
+  let r;try{r=await MCP.callTool(NOTION,"notion-query-data-sources",{data:{mode:"rows",data_source_url:"collection://"+n.ds.diary,limit:100,
+    filter:{type:"group",operator:"and",filters:[{type:"property",property:"Date",propertyType:"date",operator:"date_is_within",value:{type:"exact",value:{type:"daterange",start_date:`${k}-01`,end_date:`${k}-${pad(daysIn(y,m-1))}`}}}]}}})}
+  catch(e){pulled[k]=0;if(force)toast(mcpMsg(e,NOTION));return 0}
+  let p=r.payload;if(typeof p==="string"){try{p=JSON.parse(p)}catch(e){}}let ch=0;
+  for(const row of rowsOf(p)){const ds=(cellText(row["date:Date:start"])||cellText(row.Date)||cellText(row.Title)).slice(0,10);if(!/^\d{4}-\d\d-\d\d$/.test(ds)||!ds.startsWith(k))continue;
+    const d=day(ds);if(d.ed&&(!d.ns||d.ed>d.ns))continue;let dirty=false;
+    for(const[col,f]of Object.entries(NFIELD))if(col in row){const v=cellText(row[col]);if((d[f]||"")!==v){d[f]=v;dirty=true}}
+    if("Reset" in row){const[a,...b]=cellText(row.Reset).split("\n→ ");if((d.reset||"")!==a||(d.resetAct||"")!==b.join("\n→ ")){d.reset=a;d.resetAct=b.join("\n→ ");dirty=true}}
+    if("To do" in row){const t=cellText(row["To do"]).split("\n").filter(Boolean).map(l=>({t:l.replace(/^\[[ xX]\]\s?/,""),done:/^\[[xX]\]/.test(l)}));
+      if(JSON.stringify(t)!==JSON.stringify(d.todos||[])){d.todos=t;dirty=true}}
+    if(dirty){d.ns=new Date().toISOString();d.ed=d.ns;S.save("d-"+k,0,ds.slice(8));ch++}}
+  if(ch)renderSoon();if(force)toast(ch?`노션에서 ${ch}일치를 가져왔어요`:"노션과 같아요");return ch}
 async function saveNoteNotion(n,btn){if(btn)btn.disabled=true;
-  try{await nUpsert("n:"+n.id,"notes",{"Name":n.title||"(제목 없음)","date:Date:start":n.date,"date:Date:is_datetime":0,"Category":n.cat||""},n.body||"");toast("노션에 저장했어요")}
+  try{await nUpsert("n:"+n.id,"notes",noteProps(n),n.body||"");toast("노션에 저장했어요")}
   catch(e){toast(e.code?mcpMsg(e,NOTION):(e.message||String(e)))}if(btn)btn.disabled=false}
 async function notionCreateAll(btn){
   const n=cfg().notion;if(!n){toast("먼저 노션을 연결하세요");return}
@@ -349,7 +396,7 @@ async function notionCreateAll(btn){
       for(let i=0;i<list.length;i+=50){const chunk=list.slice(i,i+50);btn.textContent=`만드는 중… ${done}/${jobs.length}`;
         const r=await MCP.callTool(NOTION,"notion-create-pages",{parent:{type:"data_source_id",data_source_id:n.ds[dsKey]},pages:chunk.map(j=>({properties:j[2]})),allow_async:false});
         const ids=idsFrom(r,[n.ds[dsKey],n.page]);if(ids.length<chunk.length)throw{message:`노션 응답에서 페이지 번호를 ${ids.length}/${chunk.length}개만 읽었어요`};
-        chunk.forEach((j,ix)=>{map[j[0]]=ids[ix]});done+=chunk.length;S.save("nmap",0)}}
+        chunk.forEach((j,ix)=>{map[j[0]]=ids[ix];S.mark("nmap",j[0])});done+=chunk.length;S.save("nmap",0)}}
     toast(`노션 페이지 ${done}개를 만들었어요`)}
   catch(e){toast(e.code?mcpMsg(e,NOTION):(e.message||String(e)))}
   render()}
@@ -364,7 +411,9 @@ $("#file").addEventListener("change",async e=>{const f=e.target.files[0];if(!f||
   try{let src;
     if(ASSETS){const c=await shrink(f,1400,.8);const blob=await new Promise(r=>c.toBlob(r,"image/jpeg",.8));const a=await ASSETS.upload(blob);src=a.url}
     else{const c=await shrink(f,640,.7);src=c.toDataURL("image/jpeg",.7)}
-    photos(ds.slice(0,7))[ds.slice(8)]=src;S.save("p-"+ds.slice(0,7),0);toast("사진을 올렸어요");render()}
+    const pk="p-"+ds.slice(0,7);photos(ds.slice(0,7))[ds.slice(8)]=src;S.mark(pk,ds.slice(8));await S.flush(pk);
+    if(S.fail[pk]){photos(ds.slice(0,7))[ds.slice(8)]="";clearTimeout(S.timers[pk]);delete S.timers[pk];delete S.subs[pk];S.fail[pk]=0;saveStatus();render();return}
+    toast("사진을 올렸어요");render()}
   catch(err){toast("사진을 올리지 못했어요: "+(err.code||err.message||err))}});
 
 /* ================= dialogs ================= */
@@ -372,7 +421,7 @@ function dialog(html){const d=document.createElement("div");d.className="dim";d.
   d.addEventListener("click",e=>{if(e.target===d||e.target.closest("[data-close]"))d.remove()});document.body.appendChild(d);const f=d.querySelector("input,select,textarea");f&&f.focus();return d}
 function eventDialog(ds){const evs=eventsOn(ds);const g=gcOn();
   const d=dialog(`<h2>${esc(ds.replace(/-/g,"."))} ${DOWK[parse(ds).getDay()]} <button class="lnk" data-close>닫기</button></h2>
-  ${evs.map(e=>`<div class="ck"><span class="sm" style="width:44px">${esc(e.time||"종일")}</span><span class="in">${esc(e.title)}</span>${e.src==="l"?`<button class="x" data-act="rmev" data-ds="${ds}" data-id="${esc(e.id)}" aria-label="삭제">×</button>`:`<span class="tag">구글</span>`}</div>`).join("")||`<p class="mute sm">일정이 없어요</p>`}
+  ${evs.map(e=>`<div class="ck"><span class="sm" style="width:44px">${esc(e.time||"종일")}</span><span class="in">${esc(e.title)}</span>${e.src==="l"?`<button class="x" data-act="rmev" data-ds="${esc(ds)}" data-id="${esc(e.id)}" aria-label="삭제">×</button>`:`<span class="tag">구글</span>`}</div>`).join("")||`<p class="mute sm">일정이 없어요</p>`}
   <label>새 일정</label><input class="in" id="evT" placeholder="일정 이름" maxlength="200">
   <label>시간 (비우면 종일)</label><input class="in" id="evH" type="time">
   ${g?`<label><input type="checkbox" id="evG" checked> 구글 캘린더에 추가</label>`:""}
@@ -389,15 +438,15 @@ function habitDialog(id){const h=habits().list.find(x=>x.id===id);if(!h)return;
   <label>시작일</label><input class="in" id="hS" type="date" value="${esc(h.start||todayStr())}">
   <label><input type="checkbox" id="hO" ${h.on===false?"":"checked"}> 진행 중 (끄면 체크 목록에서 빠져요)</label>
   <div class="row" style="justify-content:space-between;margin-top:16px"><button class="btn g" id="hDel">삭제</button><button class="btn" id="hSave">저장</button></div>`);
-  d.querySelector("#hSave").onclick=()=>{h.icon=d.querySelector("#hI").value.trim();h.name=d.querySelector("#hN").value.trim()||h.name;h.cat=d.querySelector("#hC").value.trim();h.start=d.querySelector("#hS").value||h.start;h.on=d.querySelector("#hO").checked;S.save("habits",0);syncHabit(h);d.remove();render()};
-  const del=d.querySelector("#hDel");del.onclick=()=>{if(del.dataset.sure){const H=habits();H.list=H.list.filter(x=>x.id!==id);delete H.log[id];S.save("habits",0);d.remove();render()}else{del.dataset.sure=1;del.textContent="한 번 더 누르면 삭제"}}}
+  d.querySelector("#hSave").onclick=()=>{h.icon=d.querySelector("#hI").value.trim();h.name=d.querySelector("#hN").value.trim()||h.name;h.cat=d.querySelector("#hC").value.trim();h.start=d.querySelector("#hS").value||h.start;h.on=d.querySelector("#hO").checked;S.save("habits",0,"list");syncHabit(h);d.remove();render()};
+  const del=d.querySelector("#hDel");del.onclick=()=>{if(del.dataset.sure){const H=habits();H.list=H.list.filter(x=>x.id!==id);H.log[id]={};S.save("habits",0);d.remove();render()}else{del.dataset.sure=1;del.textContent="한 번 더 누르면 삭제"}}}
 function noteDialog(){const c=cfg();
   const d=dialog(`<h2>새 노트 <button class="lnk" data-close>닫기</button></h2>
   <input class="in" id="nT" placeholder="제목" maxlength="200">
   <div class="row"><input class="in" id="nD" type="date" value="${todayStr()}" style="flex:1"><select id="nC" style="flex:1">${["",...c.noteCats].map(x=>`<option value="${esc(x)}">${x?esc(x):"분류 없음"}</option>`).join("")}</select></div>
-  <div class="row" style="justify-content:space-between;margin-top:16px"><span class="mute sm">${c.notion?"노트에서 [노션 저장]을 누르면 Notes로 들어가요":""}</span><button class="btn" id="nGo">만들기</button></div>`);
+  <div class="row" style="justify-content:space-between;margin-top:16px"><span class="mute sm">${c.notion?"만들면 노션 Notes에 바로 들어가요":""}</span><button class="btn" id="nGo">만들기</button></div>`);
   const go=()=>{const t=d.querySelector("#nT").value.trim();if(!t){d.querySelector("#nT").focus();return}const date=d.querySelector("#nD").value||todayStr();
-    const n={id:uid(),title:t,date,cat:d.querySelector("#nC").value,body:""};notesDoc(date.slice(0,4)).list.push(n);S.save("n-"+date.slice(0,4),0);st.note=n.id;st.date=date;d.remove();render()};
+    const n={id:uid(),title:t,date,cat:d.querySelector("#nC").value,body:""};notesDoc(date.slice(0,4)).list.push(n);S.save("n-"+date.slice(0,4),0,"list");syncNote(n);st.note=n.id;st.date=date;d.remove();render()};
   d.querySelector("#nGo").onclick=go;d.querySelector("#nT").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.isComposing)go()})}
 
 /* ================= render pieces ================= */
@@ -405,7 +454,7 @@ function checklist(key,path,list,ph){return `${list.map((it,i)=>`<div class="ck 
   <div class="add">＋<input class="in" placeholder="${esc(ph||"추가")}" data-add="${key}|${path}" maxlength="300"></div>`}
 const ta=(key,path,ph="",rows=3)=>`<textarea rows="${rows}" data-bind="${key}|${path}" placeholder="${esc(ph)}">${esc(getPath(S.get(key),path)||"")}</textarea>`;
 const head=(title,sub,prev,next,extra="")=>`<div class="ph"><h1>${title}${sub?`<small>${sub}</small>`:""}</h1><div class="nav">${extra}${prev?`<button data-act="nav" data-n="-1">◂ PREV</button><span>|</span><button data-act="nav" data-n="1">NEXT ▸</button>`:""}</div></div>`;
-function evLines(ds,max=3){const e=eventsOn(ds);return e.slice(0,max).map(x=>`<div class="ev">${x.time?`<b>${x.time}</b>`:""}${esc(x.title)}</div>`).join("")+(e.length>max?`<div class="ev mute">+${e.length-max}</div>`:"")}
+function evLines(ds,max=3){const e=eventsOn(ds);return e.slice(0,max).map(x=>`<div class="ev">${x.time?`<b>${esc(x.time)}</b>`:""}${esc(x.title)}</div>`).join("")+(e.length>max?`<div class="ev mute">+${e.length-max}</div>`:"")}
 
 /* YEAR */
 function vYear(){const y=parse(st.date).getFullYear();const blk=m=>{const k=`${y}-${pad(m+1)}`;ensureMonth(k);const md=monthDoc(k);let evs=[];let rec=0;
@@ -421,7 +470,7 @@ function vYear(){const y=parse(st.date).getFullYear();const blk=m=>{const k=`${y
 function vMonth(){const d0=parse(st.date),y=d0.getFullYear(),m=d0.getMonth(),k=ym(d0);ensureMonth(k);ensureMonth(ym(addMonths(d0,-1)));ensureMonth(ym(addMonths(d0,1)));
   const ws=cfg().weekStart,first=weekStart(new Date(y,m,1)),last=new Date(y,m,daysIn(y,m));const weeks=[];for(let w=first;w<=last;w=addDays(w,7))weeks.push(w);
   const P=photos(k),pm=st.photo&&cfg().photos,t=todayStr(),cols=[0,1,2,3,4,5,6].map(i=>(ws+i)%7);
-  const cell=dt=>{const ds=ymd(dt),inM=dt.getMonth()===m,ph=inM&&P[pad(dt.getDate())];
+  const cell=dt=>{const ds=ymd(dt),inM=dt.getMonth()===m,ph=inM&&/^(data:image\/|https?:|\/)/.test(P[pad(dt.getDate())]||"")&&P[pad(dt.getDate())];
     return `<div class="c ${inM?"":"o"} ${ds===t?"t":""} ${ph&&pm?"pic":""}" data-act="cell" data-ds="${ds}" ${ph&&pm?`style="background-image:url('${esc(ph)}')"`:""}><button class="n" data-go-day="${ds}">${dt.getDate()}</button>${hasDiary(ds)?`<span class="dot" title="기록 있음"></span>`:""}${pm?"":evLines(ds,mqWide.matches?4:2)}</div>`};
   const grid=(ci,wk,memoRows)=>{
     let h=`<div class="cal" style="--rows:${weeks.length};grid-template-columns:${wk?"22px ":""}repeat(${ci.length},1fr)${memoRows?" minmax(112px,1.2fr)":""}">${wk?`<div class="hd"></div>`:""}${ci.map(c=>`<div class="hd">${DOW[c]}</div>`).join("")}${memoRows?`<div class="hd">MEMO</div>`:""}`;
@@ -448,7 +497,7 @@ function vWeek(){const d0=parse(st.date),s=weekStart(d0),e=addDays(s,6),wk=weekK
   return[L,R]}
 
 /* DAY */
-function vDay(){const ds=st.date,dt=parse(ds),dk="d-"+ds.slice(0,7),dd=ds.slice(8),d=day(ds),P=photos(ds.slice(0,7))[dd];ensureMonth(ds.slice(0,7));
+function vDay(){const ds=st.date,dt=parse(ds),dk="d-"+ds.slice(0,7),dd=ds.slice(8),d=day(ds),P0=photos(ds.slice(0,7))[dd],P=/^(data:image\/|https?:|\/)/.test(P0||"")?P0:"";ensureMonth(ds.slice(0,7));pullNotionMonth(ds.slice(0,7));
   const H=habits(),act=H.list.filter(h=>h.on!==false&&(!h.start||h.start<=ds));const n=cfg().notion;
   const L=head(`${pad(dt.getMonth()+1)}.${pad(dt.getDate())}`,`${DOW[dt.getDay()]} · ${dt.getFullYear()}`,!mqWide.matches)+
    `<div class="row" style="align-items:stretch"><div style="flex:1;min-width:180px"><div class="tm"><span>WAKE UP</span><input type="time" value="${esc(d.wake||"")}" data-bind="${dk}|${dd}.wake"><span>IN BED</span><input type="time" value="${esc(d.bed||"")}" data-bind="${dk}|${dd}.bed"></div>
@@ -456,8 +505,8 @@ function vDay(){const ds=st.date,dt=parse(ds),dk="d-"+ds.slice(0,7),dd=ds.slice(
    ${cfg().photos?`<div class="photo" style="width:120px;${P?`background-image:url('${esc(P)}')`:""}" data-act="dphoto" data-ds="${ds}" role="button" aria-label="사진">${P?"":"＋ 사진"}</div>`:""}</div>
    <div class="lbl">MORNING NOTE</div>${ta(dk,dd+".morning","아침의 생각",3)}
    <div class="lbl">TO DO</div>${checklist(dk,dd+".todos",d.todos||[],"할 일 추가")}
-   <div class="lbl">SCHEDULE <button class="lnk" data-act="cell" data-ds="${ds}">＋ 일정</button></div>${eventsOn(ds).map(e=>`<div class="ev" style="font-size:12px">${e.time?`<b>${e.time}</b>`:""}${esc(e.title)}</div>`).join("")||`<div class="sm mute">일정 없음</div>`}
-   <div class="lbl">HABIT</div>${act.length?`<div class="chips">${act.map(h=>`<button class="chip ${H.log[h.id]&&H.log[h.id][ds]?"on":""}" data-act="hab" data-h="${h.id}" data-ds="${ds}">${esc(h.icon||"")} ${esc(h.name)}</button>`).join("")}</div>`:`<div class="sm mute">습관 탭에서 습관을 만들어요</div>`}`;
+   <div class="lbl">SCHEDULE <button class="lnk" data-act="cell" data-ds="${ds}">＋ 일정</button></div>${eventsOn(ds).map(e=>`<div class="ev" style="font-size:12px">${e.time?`<b>${esc(e.time)}</b>`:""}${esc(e.title)}</div>`).join("")||`<div class="sm mute">일정 없음</div>`}
+   <div class="lbl">HABIT</div>${act.length?`<div class="chips">${act.map(h=>`<button class="chip ${H.log[h.id]&&H.log[h.id][ds]?"on":""}" data-act="hab" data-h="${esc(h.id)}" data-ds="${ds}">${esc(h.icon||"")} ${esc(h.name)}</button>`).join("")}</div>`:`<div class="sm mute">습관 탭에서 습관을 만들어요</div>`}`;
   const R=(mqWide.matches?head("&nbsp;","",true):"")+
    `<div class="lbl">LOG</div>${ta(dk,dd+".log","오늘 있었던 일",5)}
    <div class="lbl">JOY <span class="mute" style="letter-spacing:0;text-transform:none">잠깐이라도 웃었던 순간</span></div>${ta(dk,dd+".joy","",3)}
@@ -465,7 +514,7 @@ function vDay(){const ds=st.date,dt=parse(ds),dk="d-"+ds.slice(0,7),dd=ds.slice(
    <div class="add">→<input class="in" placeholder="내가 할 수 있는 작은 일 하나" value="${esc(d.resetAct||"")}" data-bind="${dk}|${dd}.resetAct" maxlength="200"></div>
    <div class="lbl">TOMORROW <span class="mute" style="letter-spacing:0;text-transform:none">내일은 어떤 사람이 되고 싶나요</span></div>${ta(dk,dd+".tomorrow","",2)}
    <div class="lbl">COMMENT</div>${ta(dk,dd+".comment","",3)}
-   <div class="foot"><span>${ds.replace(/-/g,".")}</span>${n?`<span id="nstat">${unsaved.has("d:"+ds)?"노션에 저장 안 됨":d.ns?"노션 저장 "+d.ns.slice(5,16).replace("T"," "):""}</span><button class="btn" data-act="nsave" data-ds="${ds}">노션 저장</button>`:`<span>자동 저장됨</span>`}</div>`;
+   <div class="foot"><span>${ds.replace(/-/g,".")}</span>${n?`<span id="nstat">${isUnsaved(ds)?"노션에 저장 안 됨":d.ns?"노션 저장 "+esc(String(d.ns).slice(5,16).replace("T"," ")):""}</span><button class="btn g" data-act="npull" data-k="${ds.slice(0,7)}">노션에서 가져오기</button><button class="btn" data-act="nsave" data-ds="${ds}">노션 저장</button>`:""}<span class="sstat"></span></div>`;
   return[L,R]}
 
 /* NOTES */
@@ -473,14 +522,14 @@ function vNotes(){const y=st.date.slice(0,4),list=notesDoc(y).list.slice().sort(
   const L=`<div class="ph"><h1>Notes</h1><div class="nav"><button class="btn g" data-act="newnote" style="letter-spacing:0">＋ 새 노트</button></div></div>
    <div class="row" style="justify-content:center;gap:18px"><button class="lnk" data-act="ny" data-n="-1">◂</button><b style="font-size:22px">${y}</b><button class="lnk" data-act="ny" data-n="1">▸</button></div>
    <div class="lbl" style="justify-content:center">CONTENTS · ${list.length}</div>
-   ${list.map(n=>`<div class="nl ${sel&&sel.id===n.id?"sel":""}" data-act="opennote" data-id="${n.id}"><span class="d">${n.date.slice(5).replace("-",".")}</span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(n.title)}</span>${n.cat?`<span class="tag">${esc(n.cat)}</span>`:""}</div>`).join("")||`<div class="empty">이 해에 쓴 노트가 없어요</div>`}`;
+   ${list.map(n=>`<div class="nl ${sel&&sel.id===n.id?"sel":""}" data-act="opennote" data-id="${esc(n.id)}"><span class="d">${esc(String(n.date).slice(5).replace("-","."))}</span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(n.title)}</span>${n.cat?`<span class="tag">${esc(n.cat)}</span>`:""}</div>`).join("")||`<div class="empty">이 해에 쓴 노트가 없어요</div>`}`;
   let R;
   if(!sel)R=`<div class="ph"><h1>&nbsp;</h1></div><div class="empty">왼쪽에서 노트를 고르거나 새 노트를 만드세요</div>`;
   else{const k="n-"+sel.date.slice(0,4),i=notesDoc(sel.date.slice(0,4)).list.indexOf(sel);
     R=`<div class="ph"><h1 style="flex:1"><input class="in" style="font-size:20px;font-weight:800;border:0" value="${esc(sel.title)}" data-bind="${k}|list.${i}.title"></h1></div>
-    <div class="row"><input class="in" type="date" value="${esc(sel.date)}" data-act-change="notedate" data-id="${sel.id}" style="flex:1"><select data-bind="${k}|list.${i}.cat" style="flex:1;border:0;border-bottom:1px solid var(--line);background:none;min-height:38px">${["",...cfg().noteCats].map(x=>`<option ${x===sel.cat?"selected":""} value="${esc(x)}">${x?esc(x):"분류 없음"}</option>`).join("")}</select></div>
+    <div class="row"><input class="in" type="date" value="${esc(sel.date)}" data-act-change="notedate" data-id="${esc(sel.id)}" style="flex:1"><select data-bind="${k}|list.${i}.cat" style="flex:1;border:0;border-bottom:1px solid var(--line);background:none;min-height:38px">${["",...cfg().noteCats].map(x=>`<option ${x===sel.cat?"selected":""} value="${esc(x)}">${x?esc(x):"분류 없음"}</option>`).join("")}</select></div>
     <textarea style="min-height:50vh;margin-top:12px" data-bind="${k}|list.${i}.body" placeholder="길게 남기고 싶은 이야기">${esc(sel.body)}</textarea>
-    <div class="foot"><button class="btn g" data-act="delnote" data-id="${sel.id}">삭제</button>${cfg().notion?`<button class="btn" data-act="nnote" data-id="${sel.id}">노션 저장</button>`:`<span>자동 저장됨</span>`}</div>`}
+    <div class="foot"><button class="btn g" data-act="delnote" data-id="${esc(sel.id)}">삭제</button><span class="sstat"></span>${cfg().notion?`<button class="btn" data-act="nnote" data-id="${esc(sel.id)}">노션 저장</button>`:""}</div>`}
   return[L,R]}
 function findNote(id){for(const k of S.keys())if(k.startsWith("n-")){const n=S.cache[k].list.find(x=>x.id===id);if(n)return n}return null}
 
@@ -498,12 +547,12 @@ function vHabit(){const H=habits(),act=H.list.filter(h=>h.on!==false),t=todayStr
   const L=`<div class="ph"><h1>Habit<small>${y}</small></h1></div>
    <div class="stats"><div><b>${act.length}개</b><span>진행 중인 습관</span></div><div><b>${todayDone}/${act.length}</b><span>오늘 완료</span></div><div><b>${tot?Math.round(dn/tot*100):0}%</b><span>이 달 전체</span></div><div><b>${best&&best.s?best.s+"일":"–"}</b><span>${best&&best.s?esc(best.h.name)+" 연속":"최장 연속"}</span></div></div>
    <div class="lbl">${y} 하루 달성 비율</div>${heat}
-   <div class="lbl">습관 목록</div>${H.list.map(h=>`<div class="hl ${h.on===false?"offh":""}" data-act="habedit" data-h="${h.id}"><span style="width:22px">${esc(h.icon||"•")}</span><span style="flex:1">${esc(h.name)}</span>${h.cat?`<span class="tag">${esc(h.cat)}</span>`:""}<span class="sm mute">${h.on===false?"꺼짐":streak(h,H.log[h.id]||{})+"일"}</span></div>`).join("")}
+   <div class="lbl">습관 목록</div>${H.list.map(h=>`<div class="hl ${h.on===false?"offh":""}" data-act="habedit" data-h="${esc(h.id)}"><span style="width:22px">${esc(h.icon||"•")}</span><span style="flex:1">${esc(h.name)}</span>${h.cat?`<span class="tag">${esc(h.cat)}</span>`:""}<span class="sm mute">${h.on===false?"꺼짐":streak(h,H.log[h.id]||{})+"일"}</span></div>`).join("")}
    <div class="add">＋<input class="in" placeholder="새 습관 이름 입력 후 Enter" data-addhabit maxlength="60"></div>`;
   let g=`<table class="hg"><thead><tr><th class="nm"></th>${Array.from({length:nd},(_,i)=>`<th>${i+1}<br><span class="mute">${DOW[new Date(hy,hmo,i+1).getDay()][0]}</span></th>`).join("")}<th style="width:30px">%</th></tr></thead><tbody>`;
-  act.forEach(h=>{let c=0,n=0;g+=`<tr><td class="nm" data-act="habedit" data-h="${h.id}">${esc(h.icon||"")} ${esc(h.name)}</td>`;
+  act.forEach(h=>{let c=0,n=0;g+=`<tr><td class="nm" data-act="habedit" data-h="${esc(h.id)}">${esc(h.icon||"")} ${esc(h.name)}</td>`;
     for(let d=1;d<=nd;d++){const ds=`${st.hmonth}-${pad(d)}`,on=!!(H.log[h.id]&&H.log[h.id][ds]),fut=ds>t,pre=h.start&&h.start>ds;if(!fut&&!pre){n++;if(on)c++}
-      g+=`<td class="c ${on?"on":"off"} ${fut||pre?"fut":""}" data-act="hab" data-h="${h.id}" data-ds="${ds}" title="${ds}"></td>`}
+      g+=`<td class="c ${on?"on":"off"} ${fut||pre?"fut":""}" data-act="hab" data-h="${esc(h.id)}" data-ds="${ds}" title="${ds}"></td>`}
     g+=`<td>${n?Math.round(c/n*100):0}</td></tr>`});
   g+="</tbody></table>"+(act.length?"":`<div class="empty">진행 중인 습관이 없어요</div>`);
   const R=`<div class="ph"><h1 style="font-size:14px;letter-spacing:.16em">${MON[hmo].toUpperCase()} <small>${hy}</small></h1><div class="nav"><button data-act="hm" data-n="-1">◂ PREV</button><span>|</span><button data-act="hm" data-n="1">NEXT ▸</button></div></div><div style="overflow-x:auto">${g}</div>`;
@@ -545,26 +594,27 @@ function render(){
   app.innerHTML=`<main class="book"><section class="page l${l.startsWith("<!--fill-->")?" fill":""}">${l}</section><section class="page r${r.startsWith("<!--fill-->")?" fill":""}">${r}</section></main>
   <nav class="tabs" aria-label="페이지">${VIEWS.map(x=>`${x==="setting"?'<span class="sp"></span>':""}<button class="${st.view===x?"on":""}" data-view="${x}">${x.toUpperCase()}</button>`).join("")}<button data-act="today" title="오늘로">TODAY</button></nav>`;
   app.querySelector(".page.l").scrollTop=sl;app.querySelector(".page.r").scrollTop=sr;
-  if(location.hash.slice(1)!==st.view)history.replaceState(null,"","#"+st.view);
+  saveStatus();if(location.hash.slice(1)!==st.view)history.replaceState(null,"","#"+st.view);
   try{localStorage.setItem("twd-ui",JSON.stringify({view:st.view,photo:st.photo}))}catch(e){}
 }
 function go2(view,date){st.view=view;if(date)st.date=date;render();for(const el of document.querySelectorAll(".page,.book"))el.scrollTop=0}
 
 /* ================= events ================= */
-document.addEventListener("input",e=>{const el=e.target,b=el.dataset.bind;if(!b)return;const[k,p]=b.split("|");setPath(S.get(k),p,el.value);S.save(k);
-  if(k.startsWith("d-"))markUnsaved("d:"+k.slice(2)+"-"+p.slice(0,2));
-  if(k.startsWith("m-"))syncMonth(k.slice(2));if(k.startsWith("w-"))syncWeek(k.slice(2))});
+function afterEdit(k,p){
+  if(k.startsWith("d-"))markUnsaved(k.slice(2)+"-"+p.slice(0,2));
+  if(k.startsWith("m-"))syncMonth(k.slice(2));if(k.startsWith("w-"))syncWeek(k.slice(2));
+  if(k.startsWith("n-")){const i=+p.split(".")[1],n=S.get(k).list[i];n&&syncNote(n)}}
+document.addEventListener("input",e=>{const el=e.target,b=el.dataset.bind;if(!b)return;const[k,p]=b.split("|");setPath(S.get(k),p,el.value);S.save(k,500,p.split(".")[0]);afterEdit(k,p)});
 document.addEventListener("change",e=>{const el=e.target;
-  if(el.dataset.check){const[k,p]=el.dataset.check.split("|");setPath(S.get(k),p,el.checked);S.save(k,0);if(k.startsWith("d-"))markUnsaved("d:"+k.slice(2)+"-"+p.slice(0,2));if(k.startsWith("m-"))syncMonth(k.slice(2));if(k.startsWith("w-"))syncWeek(k.slice(2));render();return}
+  if(el.dataset.check){const[k,p]=el.dataset.check.split("|");setPath(S.get(k),p,el.checked);S.save(k,0,p.split(".")[0]);afterEdit(k,p);render();return}
   if(el.id==="calSel"){cfg().calId=el.value;S.save("settings",0);resetGcal();render();return}
   if(el.dataset.actChange==="notedate"){const n=findNote(el.dataset.id);if(!n||!el.value)return;const oy=n.date.slice(0,4),ny=el.value.slice(0,4);n.date=el.value;
-    if(oy!==ny){const o=notesDoc(oy);o.list=o.list.filter(x=>x.id!==n.id);notesDoc(ny).list.push(n);S.save("n-"+oy,0);st.date=el.value}S.save("n-"+ny,0);render()}});
+    if(oy!==ny){const o=notesDoc(oy);o.list=o.list.filter(x=>x.id!==n.id);notesDoc(ny).list.push(n);S.save("n-"+oy,0,"list");st.date=el.value}S.save("n-"+ny,0,"list");syncNote(n);render()}});
 document.addEventListener("focusout",()=>{if(pendingRender)setTimeout(()=>{if(!typing()&&pendingRender){pendingRender=false;render()}},50)});
 document.addEventListener("keydown",e=>{const el=e.target;if(e.key!=="Enter"||e.isComposing)return;
-  if(el.dataset.add){const v=el.value.trim();if(!v)return;e.preventDefault();const[k,p]=el.dataset.add.split("|");const doc=S.get(k);const arr=getPath(doc,p)||[];arr.push({t:v,done:false});setPath(doc,p,arr);S.save(k,0);
-    if(k.startsWith("d-"))markUnsaved("d:"+k.slice(2)+"-"+p.slice(0,2));if(k.startsWith("m-"))syncMonth(k.slice(2));if(k.startsWith("w-"))syncWeek(k.slice(2));
+  if(el.dataset.add){const v=el.value.trim();if(!v)return;e.preventDefault();const[k,p]=el.dataset.add.split("|");const doc=S.get(k);const arr=getPath(doc,p)||[];arr.push({t:v,done:false});setPath(doc,p,arr);S.save(k,0,p.split(".")[0]);afterEdit(k,p);
     render();const ni=document.querySelector(`[data-add="${CSS.escape(el.dataset.add)}"]`);ni&&ni.focus();return}
-  if(el.hasAttribute("data-addhabit")){const v=el.value.trim();if(!v)return;const h={id:uid(),name:v,icon:"",cat:"",start:todayStr(),on:true};habits().list.push(h);S.save("habits",0);syncHabit(h);render();document.querySelector("[data-addhabit]")?.focus();toast("습관을 만들었어요");return}
+  if(el.hasAttribute("data-addhabit")){const v=el.value.trim();if(!v)return;const h={id:uid(),name:v,icon:"",cat:"",start:todayStr(),on:true};habits().list.push(h);S.save("habits",0,"list");syncHabit(h);render();document.querySelector("[data-addhabit]")?.focus();toast("습관을 만들었어요");return}
   if(el.hasAttribute("data-addcat")){const v=el.value.trim();if(!v)return;if(!cfg().noteCats.includes(v))cfg().noteCats.push(v);S.save("settings",0);render();document.querySelector("[data-addcat]")?.focus()}});
 document.addEventListener("click",async e=>{
   const tv=e.target.closest("[data-view]");if(tv){go2(tv.dataset.view);return}
@@ -577,19 +627,21 @@ document.addEventListener("click",async e=>{
   case"openm":go2("month",a.dataset.k+"-01");break;
   case"cell":if(st.photo&&c.photos&&st.view==="month")pickPhoto(a.dataset.ds);else eventDialog(a.dataset.ds);break;
   case"photo":st.photo=!st.photo;render();break;
-  case"dphoto":{const ds=a.dataset.ds,P=photos(ds.slice(0,7));if(P[ds.slice(8)]){const d=dialog(`<h2>사진 <button class="lnk" data-close>닫기</button></h2><img src="${esc(P[ds.slice(8)])}" style="width:100%;border-radius:4px"><div class="row" style="justify-content:space-between;margin-top:12px"><button class="btn g" id="pDel">사진 빼기</button><button class="btn" id="pNew">다른 사진</button></div>`);
-      d.querySelector("#pDel").onclick=()=>{delete P[ds.slice(8)];S.save("p-"+ds.slice(0,7),0);d.remove();render()};d.querySelector("#pNew").onclick=()=>{d.remove();pickPhoto(ds)}}else pickPhoto(ds);break}
-  case"rmitem":{const doc=S.get(a.dataset.k),arr=getPath(doc,a.dataset.p);arr.splice(+a.dataset.i,1);S.save(a.dataset.k,0);const k=a.dataset.k;if(k.startsWith("d-"))markUnsaved("d:"+k.slice(2)+"-"+a.dataset.p.slice(0,2));if(k.startsWith("m-"))syncMonth(k.slice(2));if(k.startsWith("w-"))syncWeek(k.slice(2));render();break}
-  case"rmev":{const k=a.dataset.ds.slice(0,7),L=localEv(k);L.list=L.list.filter(x=>x.id!==a.dataset.id);S.save("ev-"+k,0);a.closest(".dim").remove();render();break}
-  case"hab":{const H=habits(),id=a.dataset.h,ds=a.dataset.ds;if(ds>todayStr()){toast("오늘 이후는 체크할 수 없어요");break}const l=H.log[id]||(H.log[id]={});if(l[ds])delete l[ds];else l[ds]=1;S.save("habits",0);syncHabitDay(ds);markUnsaved("d:"+ds);render();break}
+  case"dphoto":{const ds=a.dataset.ds,P=photos(ds.slice(0,7));if(/^(data:image\/|https?:|\/)/.test(P[ds.slice(8)]||"")){const d=dialog(`<h2>사진 <button class="lnk" data-close>닫기</button></h2><img src="${esc(P[ds.slice(8)])}" style="width:100%;border-radius:4px"><div class="row" style="justify-content:space-between;margin-top:12px"><button class="btn g" id="pDel">사진 빼기</button><button class="btn" id="pNew">다른 사진</button></div>`);
+      d.querySelector("#pDel").onclick=()=>{P[ds.slice(8)]="";S.save("p-"+ds.slice(0,7),0,ds.slice(8));d.remove();render()};d.querySelector("#pNew").onclick=()=>{d.remove();pickPhoto(ds)}}else pickPhoto(ds);break}
+  case"rmitem":{const doc=S.get(a.dataset.k),arr=getPath(doc,a.dataset.p);arr.splice(+a.dataset.i,1);S.save(a.dataset.k,0,a.dataset.p.split(".")[0]);afterEdit(a.dataset.k,a.dataset.p);render();break}
+  case"rmev":{const k=a.dataset.ds.slice(0,7),L=localEv(k);L.list=L.list.filter(x=>x.id!==a.dataset.id);S.save("ev-"+k,0,"list");a.closest(".dim").remove();render();break}
+  case"hab":{const H=habits(),id=a.dataset.h,ds=a.dataset.ds,hb=H.list.find(x=>x.id===id);if(!hb)break;if(ds>todayStr()){toast("오늘 이후는 체크할 수 없어요");break}if(hb.start&&ds<hb.start){toast("습관 시작일 전이에요");break}
+    const l=H.log[id]||(H.log[id]={});l[ds]=l[ds]?0:1;S.save("habits",0,"log");syncHabitDay(ds);markUnsaved(ds);render();break}
   case"habedit":habitDialog(a.dataset.h);break;
   case"hm":st.hmonth=ym(addMonths(parse(st.hmonth+"-01"),+a.dataset.n));render();break;
   case"nsave":saveDayNotion(a.dataset.ds,a);break;
+  case"npull":a.disabled=true;await pullNotionMonth(a.dataset.k,true);render();break;
   case"newnote":noteDialog();break;
   case"opennote":st.note=a.dataset.id;render();if(!mqWide.matches)document.querySelector(".page.r")?.scrollIntoView({behavior:"smooth"});break;
   case"ny":st.date=`${+st.date.slice(0,4)+ +a.dataset.n}-01-01`;st.note=null;render();break;
   case"nnote":{const n=findNote(a.dataset.id);n&&saveNoteNotion(n,a);break}
-  case"delnote":if(a.dataset.sure){const n=findNote(a.dataset.id);const y=n.date.slice(0,4),D=notesDoc(y);D.list=D.list.filter(x=>x.id!==n.id);S.save("n-"+y,0);st.note=null;render()}else{a.dataset.sure=1;a.textContent="한 번 더 누르면 삭제"}break;
+  case"delnote":if(a.dataset.sure){const n=findNote(a.dataset.id);const y=n.date.slice(0,4),D=notesDoc(y);D.list=D.list.filter(x=>x.id!==n.id);S.save("n-"+y,0,"list");st.note=null;render()}else{a.dataset.sure=1;a.textContent="한 번 더 누르면 삭제"}break;
   case"ws":c.weekStart=+a.dataset.v;S.save("settings",0);render();break;
   case"photos":c.photos=a.dataset.v==="1";if(!c.photos)st.photo=false;S.save("settings",0);render();break;
   case"rmcat":c.noteCats.splice(+a.dataset.i,1);S.save("settings",0);render();break;
@@ -604,8 +656,10 @@ async function loadCals(){if(!MCP)return;try{const r=await MCP.callTool(GCAL,"li
 async function exportData(){const data=JSON.stringify({app:"twin-diary",v:1,at:new Date().toISOString(),docs:Object.fromEntries(S.keys().map(k=>[k,S.cache[k]]))},null,1);const name=`twin-diary-${todayStr()}.json`;
   if(DL){try{await DL.save({filename:name,data});toast("백업 파일을 저장했어요")}catch(e){toast("저장을 취소했거나 실패했어요")}return}
   const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data],{type:"application/json"}));a.download=name;document.body.appendChild(a);a.click();a.remove();toast("백업 파일을 저장했어요")}
-$("#importFile").addEventListener("change",async e=>{const f=e.target.files[0];if(!f)return;try{const j=JSON.parse(await f.text());if(j.app!=="twin-diary"||!j.docs)throw new Error("트윈 다이어리 백업 파일이 아니에요");
-  let n=0;for(const[k,v]of Object.entries(j.docs)){if(!/^[A-Za-z0-9_.~:@+-]+$/.test(k)||typeof v!=="object"||!v)continue;S.cache[k]=v;S.save(k,0);n++}toast(`${n}개 항목을 불러왔어요`);resetGcal();render()}catch(err){toast("불러오기 실패: "+err.message)}});
+const KEY_OK=/^(settings|nmap|habits|[dmp]-\d{4}-\d\d|ev-\d{4}-\d\d|w-\d{4}-\d\d-\d\d|n-\d{4})$/;
+const safeJSON=t=>JSON.parse(t,(k,v)=>k==="__proto__"||k==="constructor"||k==="prototype"?undefined:v);
+$("#importFile").addEventListener("change",async e=>{const f=e.target.files[0];if(!f)return;try{const j=safeJSON(await f.text());if(!j||j.app!=="twin-diary"||!j.docs||typeof j.docs!=="object")throw new Error("트윈 다이어리 백업 파일이 아니에요");
+  let n=0;for(const[k,v]of Object.entries(j.docs)){if(!KEY_OK.test(k)||typeof v!=="object"||!v||Array.isArray(v))continue;S.cache[k]=v;S.save(k,0);n++}toast(`${n}개 항목을 불러왔어요`);resetGcal();render()}catch(err){toast("불러오기 실패: "+err.message)}});
 addEventListener("hashchange",()=>{const h=location.hash.slice(1);if(VIEWS.includes(h)&&h!==st.view){st.view=h;render()}});
 mqWide.addEventListener?.("change",()=>render());
 
@@ -618,17 +672,21 @@ async function boot(){
     try{const[db,user]=await Promise.all([CL.use("db"),CL.use("user")]);const id=user&&await user.id();
       if(db&&id){S.col=db.collection("data/users/"+id);
         const snap=await Promise.race([S.col.limit(1000).get(),new Promise((_,no)=>setTimeout(()=>no(new Error("timeout")),10000))]);
-        S.mode="db";snap.docs.forEach(d=>{S.cache[d.id]=JSON.parse(JSON.stringify(d.data()))});
+        S.mode="db";snap.docs.forEach(d=>{S.cache[d.id]=JSON.parse(JSON.stringify(d.data()));S.known.add(d.id)});
         if(snap.empty){const loc=loadLocal();for(const[k,v]of Object.entries(loc)){S.cache[k]=v;S.save(k,0)}}
-        S.col.onSnapshot(sn=>{let ch=false;for(const c of sn.docChanges()){const k=c.doc.id;if(S.busy(k))continue;
-            if(c.type==="removed"){if(k in S.cache){delete S.cache[k];ch=true}}else{const v=JSON.stringify(c.doc.data());if(JSON.stringify(S.cache[k])!==v){S.cache[k]=JSON.parse(v);ch=true}}}
+        S.col.onSnapshot(sn=>{let ch=false;for(const c of sn.docChanges()){const k=c.doc.id;
+            if(c.type==="removed"){if(!S.busy(k)&&k in S.cache){delete S.cache[k];S.known.delete(k);ch=true}continue}
+            S.known.add(k);const remote=JSON.parse(JSON.stringify(c.doc.data()||{}));
+            if(!S.busy(k)){if(JSON.stringify(S.cache[k])!==JSON.stringify(remote)){S.cache[k]=remote;ch=true}continue}
+            const mine=S.subs[k];if(mine==="all")continue;const cur=S.get(k);   // keep fields this device is still writing, take the rest
+            for(const f of Object.keys(remote))if(!(mine&&mine.has(f))&&JSON.stringify(cur[f])!==JSON.stringify(remote[f])){cur[f]=remote[f];ch=true}}
           if(ch)renderSoon()},()=>{});
       }}catch(e){S.mode="local";toast("클로드 저장소에 닿지 않아 이 기기에 저장해요")}
     [MCP,ASSETS,DL]=await Promise.all([CL.use("mcp"),CL.use("assets"),CL.use("downloads")]).catch(()=>[null,null,null]);
   }
   if(S.mode==="local")Object.assign(S.cache,loadLocal());
-  if(!CL&&"serviceWorker"in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
-  render();
+  if(!CL&&"serviceWorker"in navigator&&window.isSecureContext)navigator.serviceWorker.register("sw.js").catch(()=>{});
+  render();saveStatus();
 }
 boot();
 </script>
