@@ -129,7 +129,7 @@ textarea:focus,.in:focus{border-bottom-color:var(--ink)}
   .tabs{position:fixed;left:0;right:0;bottom:0;flex-direction:row;padding:6px 6px calc(6px + env(safe-area-inset-bottom));gap:2px;background:var(--paper);border-top:1px solid var(--line);overflow-x:auto;z-index:20}
   .tabs button{writing-mode:horizontal-tb;border:0;border-radius:4px;min-height:44px;flex:1 1 0;min-width:0;padding:4px 2px;letter-spacing:.02em;overflow:hidden;white-space:nowrap}
   .tabs .sp{display:none}
-  @media (max-width:359px){.book{padding-bottom:calc(88px + env(safe-area-inset-bottom))}.tabs{display:grid;grid-template-columns:repeat(4,1fr);row-gap:2px}.tabs button{min-height:34px;padding:2px 0;letter-spacing:0}}
+  @media (max-width:359px){.book{padding-bottom:calc(64px + env(safe-area-inset-bottom))}.tabs{display:grid;grid-template-columns:repeat(4,1fr);row-gap:0}.tabs button{min-height:26px;padding:0;letter-spacing:0;font-size:9px}}
   .cal .c{min-height:58px;padding:2px}
   .ev{font-size:9.5px}
   .yr{grid-template-columns:1fr}
@@ -137,6 +137,7 @@ textarea:focus,.in:focus{border-bottom-color:var(--ink)}
   .hg th.nm,.hg td.nm{width:70px}
 }
 @media (max-width:360px){ .ph h1{font-size:20px} .cal .hd{font-size:8px;letter-spacing:0} .page{padding:12px 10px} }
+@media (max-width:359px){ .ph{gap:4px;margin-bottom:8px;min-height:0;padding-bottom:4px} .ph h1{font-size:16px} .nav{font-size:9px;letter-spacing:.04em} .cal .c{min-height:38px} .page{padding:8px 8px} }
 /* ---- dual screen: Surface Duo / foldables reporting two segments ---- */
 @media (horizontal-viewport-segments:2){
   #app{flex-direction:column}
@@ -232,6 +233,7 @@ const NOTION="Notion",GCAL="Google Calendar";
 
 /* ================= data helpers ================= */
 const dayDoc=ds=>S.get("d-"+ds.slice(0,7),{});
+const okPhoto=u=>typeof u==="string"&&/^(data:image\/[a-z0-9.+-]+;base64,[a-z0-9+\/=]+|(https?:\/\/|\/)[^\s'"()\\<>]*)$/i.test(u)?u:"";
 const day=ds=>{const m=dayDoc(ds),k=ds.slice(8);return m[k]||(m[k]={})};
 const monthDoc=k=>S.get("m-"+k,{goals:[],periodLog:"",keywords:{}});
 const photos=k=>S.get("p-"+k,{});
@@ -268,7 +270,7 @@ function addG(e,k){if(!e||e.status==="cancelled")return;const s=e.start||{},en=e
   else if(s.date){sd=parse(s.date);ed=en.date?addDays(parse(en.date),-1):sd;if(ed<sd)ed=sd}else return;
   const first=ymd(sd);
   for(let d=new Date(sd.getFullYear(),sd.getMonth(),sd.getDate()),i=0;d<=ed&&i<62;d=addDays(d,1),i++){const ds=ymd(d);if(!ds.startsWith(k))continue;
-    const L=gc.byDate[ds]||(gc.byDate[ds]=[]);if(!L.some(x=>x.id===e.id))L.push({id:e.id,title:e.summary||"(제목 없음)",time:ds===first?time:"",src:"g"})}}
+    const L=gc.byDate[ds]||(gc.byDate[ds]=[]);if(!L.some(x=>x.id===e.id))L.push({id:e.id,title:e.summary||"(제목 없음)",time:ds===first?time:"",src:"g",multi:ymd(ed)!==first})}}
 async function morePages(k,input,token){for(let i=0;token&&i<8;i++){try{const r=await MCP.callTool(GCAL,"list_events",{...input,pageToken:token});const p=r.payload||{};(p.events||[]).forEach(e=>addG(e,k));token=p.nextPageToken}catch(e){gc.err=e;break}}renderSoon()}
 function clearMonth(k){for(const ds of Object.keys(gc.byDate))if(ds.startsWith(k))delete gc.byDate[ds]}
 function resetGcal(){for(const k of Object.keys(gc.watches)){gc.watches[k]();}gc.watches={};gc.order=[];gc.byDate={}}
@@ -277,10 +279,24 @@ function eventsOn(ds){
   const g=gcOn()?(gc.byDate[ds]||[]):[];
   return [...g,...loc].sort((a,b)=>(a.time||"").localeCompare(b.time||""));
 }
+function evTimes(ds,time){const start=time?`${ds}T${time}:00`:`${ds}T00:00:00`;
+  let end;if(time){const[h,mi]=time.split(":").map(Number);const e=new Date(parse(ds));e.setHours(h+1,mi);end=`${ymd(e)}T${pad(e.getHours())}:${pad(e.getMinutes())}:00`}else end=`${ymd(addDays(parse(ds),1))}T00:00:00`;
+  return{start,end}}
+async function updateEvent(ds,ev,title,time){
+  if(ev.src==="g"){const input={eventId:ev.id,summary:title};if(!ev.multi){const{start,end}=evTimes(ds,time);input.startTime=start;input.endTime=end;if(!time)input.allDay=true}
+    if(cfg().calId)input.calendarId=cfg().calId;
+    try{await MCP.callTool(GCAL,"update_event",input);toast("구글 캘린더 일정을 고쳤어요");MCP.invalidate(GCAL,"list_events").catch(()=>{})}catch(e){toast(mcpMsg(e,GCAL));return false}}
+  else{const k=ds.slice(0,7),x=localEv(k).list.find(y=>y.id===ev.id);if(!x)return false;x.title=title;x.time=time;S.save("ev-"+k,0,"list");toast("일정을 고쳤어요")}
+  render();return true}
+async function removeEvent(ds,ev){
+  if(ev.src==="g"){const input={eventId:ev.id};if(cfg().calId)input.calendarId=cfg().calId;
+    try{await MCP.callTool(GCAL,"delete_event",input);for(const L of Object.values(gc.byDate)){const i=L.findIndex(x=>x.id===ev.id);if(i>=0)L.splice(i,1)}
+      toast("구글 캘린더에서 지웠어요");MCP.invalidate(GCAL,"list_events").catch(()=>{})}catch(e){toast(mcpMsg(e,GCAL));return false}}
+  else{const k=ds.slice(0,7),L=localEv(k);L.list=L.list.filter(x=>x.id!==ev.id);S.save("ev-"+k,0,"list");toast("일정을 지웠어요")}
+  render();return true}
 async function addEvent(ds,title,time,toG){
   if(toG&&gcOn()){
-    const start=time?`${ds}T${time}:00`:`${ds}T00:00:00`;
-    let end;if(time){const[h,mi]=time.split(":").map(Number);const e=new Date(parse(ds));e.setHours(h+1,mi);end=`${ymd(e)}T${pad(e.getHours())}:${pad(e.getMinutes())}:00`}else end=`${ymd(addDays(parse(ds),1))}T00:00:00`;
+    const{start,end}=evTimes(ds,time);
     const input={summary:title,startTime:start,endTime:end};if(!time)input.allDay=true;if(cfg().calId)input.calendarId=cfg().calId;
     try{await MCP.callTool(GCAL,"create_event",input);toast("구글 캘린더에 추가했어요");MCP.invalidate(GCAL,"list_events").catch(()=>{})}
     catch(e){toast(mcpMsg(e,GCAL));return false}
@@ -350,8 +366,17 @@ async function saveDayNotion(ds,btn){
   try{await nUpsert("d:"+ds,"diary",diaryProps(ds));day(ds).ns=new Date().toISOString();S.save("d-"+ds.slice(0,7),0,ds.slice(8));toast("노션에 저장했어요")}
   catch(e){toast(e.code?mcpMsg(e,NOTION):(e.message||String(e)))}
   render()}
-const autoQ={};
-function autoNotion(mapKey,fn){if(!cfg().notion||!MCP)return;clearTimeout(autoQ[mapKey]);autoQ[mapKey]=setTimeout(()=>fn().catch(e=>toast(e.code?mcpMsg(e,NOTION):(e.message||String(e)))),2500)}
+const autoQ={},autoN={};
+const NPERM=["needs_reauth","server_not_connected","blocked_by_policy","approval_required","consent_required","not_in_manifest","selection_required"];
+function pend(k,on){const P=S.get("npend",{});if(!!P[k]===on)return;if(on)P[k]=1;else delete P[k];S.save("npend",0,k)}
+function autoNotion(mapKey,fn,delay=2500){if(!cfg().notion||!MCP)return;pend(mapKey,true);clearTimeout(autoQ[mapKey]);
+  autoQ[mapKey]=setTimeout(()=>fn().then(()=>{delete autoN[mapKey];pend(mapKey,false)},e=>{const n=autoN[mapKey]=(autoN[mapKey]||0)+1,msg=e.code?mcpMsg(e,NOTION):(e.message||String(e));
+    if(n<5&&!NPERM.includes(e.code)){toast(msg+" — 잠시 뒤 다시 보낼게요");autoNotion(mapKey,fn,Math.min(120000,3000*2**(n-1)))}else{delete autoN[mapKey];toast(msg+" — 다음에 열 때 다시 보낼게요")}}),delay)}
+function resendNotion(){if(!cfg().notion||!MCP)return;const P=S.get("npend",{});
+  for(const k of Object.keys(P)){if(!P[k])continue;const i=k.indexOf(":"),t=k.slice(0,i),id=k.slice(i+1);
+    if(t==="m")syncMonth(id);else if(t==="w")syncWeek(id);else if(t==="hl")syncHabitDay(id);
+    else if(t==="h"){const h=habits().list.find(x=>x.id===id);h?syncHabit(h):pend(k,false)}
+    else if(t==="n"){const n=findNote(id);n?syncNote(n):pend(k,false)}else pend(k,false)}}
 const syncMonth=k=>autoNotion("m:"+k,()=>nUpsert("m:"+k,"planner",plannerProps("Month",k)));
 const syncWeek=k=>autoNotion("w:"+k,()=>nUpsert("w:"+k,"planner",plannerProps("Week",k)));
 function syncHabit(h){autoNotion("h:"+h.id,()=>nUpsert("h:"+h.id,"habits",{"Name":h.name,"Icon":h.icon||"","Category":h.cat||"","date:Start:start":h.start||todayStr(),"date:Start:is_datetime":0,"On":h.on===false?"__NO__":"__YES__"}))}
@@ -364,21 +389,46 @@ const pulled={};
 const NFIELD={"Wake Up":"wake","In Bed":"bed","Sleep Journal":"sleep","Morning Note":"morning","Log":"log","Joy":"joy","Tomorrow":"tomorrow","Comment":"comment"};
 function cellText(v){if(v==null)return"";if(typeof v==="string"||typeof v==="number")return String(v);if(Array.isArray(v))return v.map(cellText).join("");
   for(const f of ["plain_text","text","content","value","name","start"])if(v[f]!=null)return cellText(v[f]);return""}
-function rowsOf(x,out=[]){if(Array.isArray(x)){x.forEach(y=>rowsOf(y,out));return out}if(x&&typeof x==="object"){const o=x.properties&&typeof x.properties==="object"?x.properties:x;
-  if("Title" in o&&("Joy" in o||"Log" in o||"date:Date:start" in o||"Date" in o))out.push(o);else Object.values(x).forEach(y=>rowsOf(y,out))}return out}
+function dateOf(v){const t=cellText(v).trim();if(/^\d{4}-\d\d-\d\dT/.test(t)&&/(Z|[+-]\d\d:?\d\d)$/.test(t)){const d=new Date(t);if(!isNaN(d))return ymd(d)}
+  const m=t.match(/(\d{4})\s*[-./년]\s*(\d{1,2})\s*[-./월]\s*(\d{1,2})/);if(m)return`${m[1]}-${pad(+m[2])}-${pad(+m[3])}`;
+  const d=/[a-z]/i.test(t)?new Date(t):null;return d&&!isNaN(d)?ymd(d):t.slice(0,10)}
+const pid=x=>{const m=(x?[x.url,x.id,x.page_id].join(" "):"").replace(/-/g,"").match(/[0-9a-f]{32}/i);return m?m[0].toLowerCase():""};
+function rowsOf(x,test,out=[]){if(Array.isArray(x)){x.forEach(y=>rowsOf(y,test,out));return out}if(x&&typeof x==="object"){const o=x.properties&&typeof x.properties==="object"?x.properties:x;
+  if(test(o))out.push({...o,__id:pid(x)||pid(o)});else Object.values(x).forEach(y=>rowsOf(y,test,out))}return out}
+const ckLines=t=>t.split("\n").filter(Boolean).map(l=>({t:l.replace(/^\[[ xX]\]\s?/,""),done:/^\[[xX]\]/.test(l)}));
+const setIf=(o,f,v)=>{if(JSON.stringify(o[f]??"")===JSON.stringify(v))return 0;o[f]=v;return 1};
+const unsent=k=>!!S.get("npend",{})[k];   // edited here and not yet in Notion: keep this device's version
+const dayRange=(a,b)=>({type:"group",operator:"and",filters:[{type:"property",property:"Date",propertyType:"date",operator:"date_is_within",value:{type:"exact",value:{type:"daterange",start_date:a,end_date:b}}}]});
+async function nRows(dsKey,filter,test){const data={mode:"rows",data_source_url:"collection://"+cfg().notion.ds[dsKey],limit:100};if(filter)data.filter=filter;   // ponytail: first 100 rows per query, add paging if a month/notes list outgrows it
+  const r=await MCP.callTool(NOTION,"notion-query-data-sources",{data});let p=r.payload;if(typeof p==="string"){try{p=JSON.parse(p)}catch(e){}}return rowsOf(p,test)}
+/* Notion -> app for every database: Diary·Planner·Habit Log by date, Notes·Habits by page. Skips anything edited here and not yet sent. */
 async function pullNotionMonth(k,force){const n=cfg().notion;if(!n||!MCP||(pulled[k]&&!force))return 0;pulled[k]=1;const[y,m]=k.split("-").map(Number);
-  let r;try{r=await MCP.callTool(NOTION,"notion-query-data-sources",{data:{mode:"rows",data_source_url:"collection://"+n.ds.diary,limit:100,
-    filter:{type:"group",operator:"and",filters:[{type:"property",property:"Date",propertyType:"date",operator:"date_is_within",value:{type:"exact",value:{type:"daterange",start_date:`${k}-01`,end_date:`${k}-${pad(daysIn(y,m-1))}`}}}]}}})}
-  catch(e){pulled[k]=0;if(force)toast(mcpMsg(e,NOTION));return 0}
-  let p=r.payload;if(typeof p==="string"){try{p=JSON.parse(p)}catch(e){}}let ch=0;
-  for(const row of rowsOf(p)){const ds=(cellText(row["date:Date:start"])||cellText(row.Date)||cellText(row.Title)).slice(0,10);if(!/^\d{4}-\d\d-\d\d$/.test(ds)||!ds.startsWith(k))continue;
-    const d=day(ds);if(d.ed&&(!d.ns||d.ed>d.ns))continue;let dirty=false;
-    for(const[col,f]of Object.entries(NFIELD))if(col in row){const v=cellText(row[col]);if((d[f]||"")!==v){d[f]=v;dirty=true}}
-    if("Reset" in row){const[a,...b]=cellText(row.Reset).split("\n→ ");if((d.reset||"")!==a||(d.resetAct||"")!==b.join("\n→ ")){d.reset=a;d.resetAct=b.join("\n→ ");dirty=true}}
-    if("To do" in row){const t=cellText(row["To do"]).split("\n").filter(Boolean).map(l=>({t:l.replace(/^\[[ xX]\]\s?/,""),done:/^\[[xX]\]/.test(l)}));
-      if(JSON.stringify(t)!==JSON.stringify(d.todos||[])){d.todos=t;dirty=true}}
-    if(dirty){d.ns=new Date().toISOString();d.ed=d.ns;S.save("d-"+k,0,ds.slice(8));ch++}}
-  if(ch)renderSoon();if(force)toast(ch?`노션에서 ${ch}일치를 가져왔어요`:"노션과 같아요");return ch}
+  const rng=dayRange(`${k}-01`,`${k}-${pad(daysIn(y,m-1))}`);let ch=0,err=null;
+  const step=async f=>{try{ch+=await f()}catch(e){err=e}};
+  await step(async()=>{let c=0;for(const row of await nRows("diary",rng,o=>"Title" in o&&("Joy" in o||"Log" in o||"date:Date:start" in o||"Date" in o))){
+    const ds=dateOf(cellText(row["date:Date:start"])||cellText(row.Date)||cellText(row.Title));if(!/^\d{4}-\d\d-\d\d$/.test(ds)||!ds.startsWith(k))continue;
+    const d=day(ds);if(d.ed&&(!d.ns||d.ed>d.ns))continue;let dirty=0;
+    for(const[col,f]of Object.entries(NFIELD))if(col in row)dirty|=setIf(d,f,cellText(row[col]));
+    if("Reset" in row){const[a,...b]=cellText(row.Reset).split("\n→ ");dirty|=setIf(d,"reset",a)|setIf(d,"resetAct",b.join("\n→ "))}
+    if("To do" in row)dirty|=setIf(d,"todos",ckLines(cellText(row["To do"])));
+    if(dirty){d.ns=new Date().toISOString();d.ed=d.ns;S.save("d-"+k,0,ds.slice(8));c++}}return c});
+  await step(async()=>{let c=0;for(const row of await nRows("planner",rng,o=>"Category" in o&&"Goal" in o)){const cat=cellText(row.Category),ds=dateOf(cellText(row["date:Date:start"])||cellText(row.Date));
+    if(cat==="Month"&&/^\d{4}-\d\d/.test(ds)){const mk=ds.slice(0,7);if(unsent("m:"+mk))continue;const M=monthDoc(mk);
+      if(setIf(M,"goals",ckLines(cellText(row.Goal)))|("Period Log" in row&&setIf(M,"periodLog",cellText(row["Period Log"])))){S.save("m-"+mk,0);c++}}
+    else if(cat==="Week"&&/^\d{4}-\d\d-\d\d$/.test(ds)){if(unsent("w:"+ds))continue;const W=S.get("w-"+ds,{goals:[],periodLog:"",memo:""});
+      if(setIf(W,"goals",ckLines(cellText(row.Goal)))|("Period Log" in row&&setIf(W,"periodLog",cellText(row["Period Log"])))|("Comment" in row&&setIf(W,"memo",cellText(row.Comment)))){S.save("w-"+ds,0);c++}}}return c});
+  await step(async()=>{let c=0;const H=habits(),byName={};H.list.forEach(h=>byName[h.name]=h.id);
+    for(const row of await nRows("habitlog",rng,o=>"Done" in o)){const ds=dateOf(cellText(row["date:Date:start"])||cellText(row.Date)||cellText(row.Title));if(!ds.startsWith(k)||unsent("hl:"+ds))continue;
+      const done=new Set(cellText(row.Done).split(",").map(x=>byName[x.trim()]).filter(Boolean));let dirty=0;
+      for(const h of H.list){const L=H.log[h.id]||(H.log[h.id]={}),want=done.has(h.id);if(!!L[ds]!==want){if(want)L[ds]=true;else delete L[ds];dirty=1}}
+      if(dirty){S.save("habits",0,"log");c++}}return c});
+  if(!pulled["*"]||force){pulled["*"]=1;const rev={};for(const[kk,v]of Object.entries(NM()))rev[String(v).replace(/-/g,"").toLowerCase()]=kk;
+    await step(async()=>{let c=0;const H=habits();for(const row of await nRows("habits",null,o=>"Name" in o&&("On" in o||"Icon" in o))){const key=rev[row.__id];if(!key||!key.startsWith("h:")||unsent(key))continue;
+      const h=H.list.find(x=>x.id===key.slice(2));if(!h)continue;const st0=dateOf(cellText(row["date:Start:start"])||cellText(row.Start));
+      if(setIf(h,"name",cellText(row.Name)||h.name)|("Icon" in row&&setIf(h,"icon",cellText(row.Icon)))|("Category" in row&&setIf(h,"cat",cellText(row.Category)))|("On" in row&&setIf(h,"on",!/^(__NO__|false|no|0)$/i.test(cellText(row.On))))|(/^\d{4}-\d\d-\d\d$/.test(st0)&&setIf(h,"start",st0))){S.save("habits",0,"list");c++}}return c});
+    await step(async()=>{let c=0;for(const row of await nRows("notes",null,o=>"Name" in o&&"Category" in o)){const key=rev[row.__id];if(!key||!key.startsWith("n:")||unsent(key))continue;
+      const nt=findNote(key.slice(2));if(!nt)continue;if(setIf(nt,"title",cellText(row.Name)||nt.title)|setIf(nt,"cat",cellText(row.Category))){S.save("n-"+nt.date.slice(0,4),0,"list");c++}}return c})}
+  if(err)setTimeout(()=>pulled[k]=0,60000);if(ch)renderSoon();if(force)toast(err?mcpMsg(err,NOTION):ch?`노션에서 ${ch}건을 가져왔어요`:"노션과 같아요");return ch}
 async function saveNoteNotion(n,btn){if(btn)btn.disabled=true;
   try{await nUpsert("n:"+n.id,"notes",noteProps(n),n.body||"");toast("노션에 저장했어요")}
   catch(e){toast(e.code?mcpMsg(e,NOTION):(e.message||String(e)))}if(btn)btn.disabled=false}
@@ -421,13 +471,19 @@ function dialog(html){const d=document.createElement("div");d.className="dim";d.
   d.addEventListener("click",e=>{if(e.target===d||e.target.closest("[data-close]"))d.remove()});document.body.appendChild(d);const f=d.querySelector("input,select,textarea");f&&f.focus();return d}
 function eventDialog(ds){const evs=eventsOn(ds);const g=gcOn();
   const d=dialog(`<h2>${esc(ds.replace(/-/g,"."))} ${DOWK[parse(ds).getDay()]} <button class="lnk" data-close>닫기</button></h2>
-  ${evs.map(e=>`<div class="ck"><span class="sm" style="width:44px">${esc(e.time||"종일")}</span><span class="in">${esc(e.title)}</span>${e.src==="l"?`<button class="x" data-act="rmev" data-ds="${esc(ds)}" data-id="${esc(e.id)}" aria-label="삭제">×</button>`:`<span class="tag">구글</span>`}</div>`).join("")||`<p class="mute sm">일정이 없어요</p>`}
+  ${evs.map((e,i)=>`<div class="ck"><span class="sm" style="width:44px">${esc(e.time||"종일")}</span><span class="in">${esc(e.title)}</span>${e.src==="g"?`<span class="tag">구글</span>`:""}<button class="lnk sm" data-evedit="${i}">수정</button><button class="x" data-evdel="${i}" aria-label="삭제">×</button></div>`).join("")||`<p class="mute sm">일정이 없어요</p>`}
   <label>새 일정</label><input class="in" id="evT" placeholder="일정 이름" maxlength="200">
   <label>시간 (비우면 종일)</label><input class="in" id="evH" type="time">
   ${g?`<label><input type="checkbox" id="evG" checked> 구글 캘린더에 추가</label>`:""}
   <div class="row" style="justify-content:space-between;margin-top:16px"><button class="btn g" data-go-day="${ds}">이 날 다이어리</button><button class="btn" id="evAdd">추가</button></div>`);
+  let edit=null;
+  d.querySelectorAll("[data-evedit]").forEach(b=>b.onclick=()=>{edit=evs[+b.dataset.evedit];d.querySelector("#evT").value=edit.title;d.querySelector("#evH").value=edit.time||"";
+    d.querySelector("#evAdd").textContent="고치기";const gc=d.querySelector("#evG");if(gc)gc.closest("label").hidden=true;d.querySelector("#evT").focus()});
+  d.querySelectorAll("[data-evdel]").forEach(b=>b.onclick=async()=>{if(!b.dataset.sure){b.dataset.sure=1;b.textContent="지우기?";return}b.disabled=true;
+    if(await removeEvent(ds,evs[+b.dataset.evdel]))d.remove();else b.disabled=false});
   const go=async()=>{const t=d.querySelector("#evT").value.trim();if(!t){d.querySelector("#evT").focus();return}const b=d.querySelector("#evAdd");b.disabled=true;
-    if(await addEvent(ds,t,d.querySelector("#evH").value,g&&d.querySelector("#evG").checked))d.remove();else b.disabled=false};
+    const ok=edit?await updateEvent(ds,edit,t,d.querySelector("#evH").value):await addEvent(ds,t,d.querySelector("#evH").value,g&&d.querySelector("#evG").checked);
+    if(ok)d.remove();else b.disabled=false};
   d.querySelector("#evAdd").onclick=go;d.querySelector("#evT").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.isComposing)go()});
   d.querySelector("[data-go-day]").onclick=()=>{d.remove();go2("day",ds)}}
 function habitDialog(id){const h=habits().list.find(x=>x.id===id);if(!h)return;
@@ -470,7 +526,7 @@ function vYear(){const y=parse(st.date).getFullYear();const blk=m=>{const k=`${y
 function vMonth(){const d0=parse(st.date),y=d0.getFullYear(),m=d0.getMonth(),k=ym(d0);ensureMonth(k);ensureMonth(ym(addMonths(d0,-1)));ensureMonth(ym(addMonths(d0,1)));
   const ws=cfg().weekStart,first=weekStart(new Date(y,m,1)),last=new Date(y,m,daysIn(y,m));const weeks=[];for(let w=first;w<=last;w=addDays(w,7))weeks.push(w);
   const P=photos(k),pm=st.photo&&cfg().photos,t=todayStr(),cols=[0,1,2,3,4,5,6].map(i=>(ws+i)%7);
-  const cell=dt=>{const ds=ymd(dt),inM=dt.getMonth()===m,ph=inM&&/^(data:image\/|https?:|\/)/.test(P[pad(dt.getDate())]||"")&&P[pad(dt.getDate())];
+  const cell=dt=>{const ds=ymd(dt),inM=dt.getMonth()===m,ph=inM&&okPhoto(P[pad(dt.getDate())])&&P[pad(dt.getDate())];
     return `<div class="c ${inM?"":"o"} ${ds===t?"t":""} ${ph&&pm?"pic":""}" data-act="cell" data-ds="${ds}" ${ph&&pm?`style="background-image:url('${esc(ph)}')"`:""}><button class="n" data-go-day="${ds}">${dt.getDate()}</button>${hasDiary(ds)?`<span class="dot" title="기록 있음"></span>`:""}${pm?"":evLines(ds,mqWide.matches?4:2)}</div>`};
   const grid=(ci,wk,memoRows)=>{
     let h=`<div class="cal" style="--rows:${weeks.length};grid-template-columns:${wk?"22px ":""}repeat(${ci.length},1fr)${memoRows?" minmax(112px,1.2fr)":""}">${wk?`<div class="hd"></div>`:""}${ci.map(c=>`<div class="hd">${DOW[c]}</div>`).join("")}${memoRows?`<div class="hd">MEMO</div>`:""}`;
@@ -497,7 +553,7 @@ function vWeek(){const d0=parse(st.date),s=weekStart(d0),e=addDays(s,6),wk=weekK
   return[L,R]}
 
 /* DAY */
-function vDay(){const ds=st.date,dt=parse(ds),dk="d-"+ds.slice(0,7),dd=ds.slice(8),d=day(ds),P0=photos(ds.slice(0,7))[dd],P=/^(data:image\/|https?:|\/)/.test(P0||"")?P0:"";ensureMonth(ds.slice(0,7));pullNotionMonth(ds.slice(0,7));
+function vDay(){const ds=st.date,dt=parse(ds),dk="d-"+ds.slice(0,7),dd=ds.slice(8),d=day(ds),P0=photos(ds.slice(0,7))[dd],P=okPhoto(P0)?P0:"";ensureMonth(ds.slice(0,7));pullNotionMonth(ds.slice(0,7));
   const H=habits(),act=H.list.filter(h=>h.on!==false&&(!h.start||h.start<=ds));const n=cfg().notion;
   const L=head(`${pad(dt.getMonth()+1)}.${pad(dt.getDate())}`,`${DOW[dt.getDay()]} · ${dt.getFullYear()}`,!mqWide.matches)+
    `<div class="row" style="align-items:stretch"><div style="flex:1;min-width:180px"><div class="tm"><span>WAKE UP</span><input type="time" value="${esc(d.wake||"")}" data-bind="${dk}|${dd}.wake"><span>IN BED</span><input type="time" value="${esc(d.bed||"")}" data-bind="${dk}|${dd}.bed"></div>
@@ -587,7 +643,7 @@ let gcCals=null;
 let rq=0;function renderSoon(){if(rq)return;rq=requestAnimationFrame(()=>{rq=0;if(typing()){pendingRender=true;return}render()})}
 let pendingRender=false;
 const typing=()=>{const a=document.activeElement;return a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)&&a.closest(".book")};
-function render(){
+function render(){if(st.date)pullNotionMonth(st.date.slice(0,7));
   const v={year:vYear,month:vMonth,week:vWeek,day:vDay,notes:vNotes,habit:vHabit,setting:vSetting}[st.view]||vMonth;
   const[l,r]=v();const app=$("#app");
   const sl=app.querySelector(".page.l")?.scrollTop||0,sr=app.querySelector(".page.r")?.scrollTop||0;
@@ -627,10 +683,9 @@ document.addEventListener("click",async e=>{
   case"openm":go2("month",a.dataset.k+"-01");break;
   case"cell":if(st.photo&&c.photos&&st.view==="month")pickPhoto(a.dataset.ds);else eventDialog(a.dataset.ds);break;
   case"photo":st.photo=!st.photo;render();break;
-  case"dphoto":{const ds=a.dataset.ds,P=photos(ds.slice(0,7));if(/^(data:image\/|https?:|\/)/.test(P[ds.slice(8)]||"")){const d=dialog(`<h2>사진 <button class="lnk" data-close>닫기</button></h2><img src="${esc(P[ds.slice(8)])}" style="width:100%;border-radius:4px"><div class="row" style="justify-content:space-between;margin-top:12px"><button class="btn g" id="pDel">사진 빼기</button><button class="btn" id="pNew">다른 사진</button></div>`);
+  case"dphoto":{const ds=a.dataset.ds,P=photos(ds.slice(0,7));if(okPhoto(P[ds.slice(8)])){const d=dialog(`<h2>사진 <button class="lnk" data-close>닫기</button></h2><img src="${esc(P[ds.slice(8)])}" style="width:100%;border-radius:4px"><div class="row" style="justify-content:space-between;margin-top:12px"><button class="btn g" id="pDel">사진 빼기</button><button class="btn" id="pNew">다른 사진</button></div>`);
       d.querySelector("#pDel").onclick=()=>{P[ds.slice(8)]="";S.save("p-"+ds.slice(0,7),0,ds.slice(8));d.remove();render()};d.querySelector("#pNew").onclick=()=>{d.remove();pickPhoto(ds)}}else pickPhoto(ds);break}
   case"rmitem":{const doc=S.get(a.dataset.k),arr=getPath(doc,a.dataset.p);arr.splice(+a.dataset.i,1);S.save(a.dataset.k,0,a.dataset.p.split(".")[0]);afterEdit(a.dataset.k,a.dataset.p);render();break}
-  case"rmev":{const k=a.dataset.ds.slice(0,7),L=localEv(k);L.list=L.list.filter(x=>x.id!==a.dataset.id);S.save("ev-"+k,0,"list");a.closest(".dim").remove();render();break}
   case"hab":{const H=habits(),id=a.dataset.h,ds=a.dataset.ds,hb=H.list.find(x=>x.id===id);if(!hb)break;if(ds>todayStr()){toast("오늘 이후는 체크할 수 없어요");break}if(hb.start&&ds<hb.start){toast("습관 시작일 전이에요");break}
     const l=H.log[id]||(H.log[id]={});l[ds]=l[ds]?0:1;S.save("habits",0,"log");syncHabitDay(ds);markUnsaved(ds);render();break}
   case"habedit":habitDialog(a.dataset.h);break;
@@ -686,7 +741,7 @@ async function boot(){
   }
   if(S.mode==="local")Object.assign(S.cache,loadLocal());
   if(!CL&&"serviceWorker"in navigator&&window.isSecureContext)navigator.serviceWorker.register("sw.js").catch(()=>{});
-  render();saveStatus();
+  render();saveStatus();resendNotion();
 }
 boot();
 </script>

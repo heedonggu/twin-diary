@@ -85,6 +85,15 @@ await t("A05 날짜 칸 눌러 일정 추가 → 칸에 시간·제목 표시, �
   await page.click(`.c[data-ds="${T}"]`, { position: { x: 40, y: 50 } }); await page.fill("#evT", "주간 회의"); await page.fill("#evH", "10:00"); await page.click("#evAdd");
   await reload(); const txt = await page.textContent(`.c[data-ds="${T}"]`); ok(txt.includes("주간 회의") && txt.includes("10:00"), txt);
 });
+await t("A05b 일정 고치기·지우기: 이름·시간 바꾸면 유지, × 두 번 누르면 삭제", async () => {
+  await page.click(`.c[data-ds="${T}"]`, { position: { x: 40, y: 50 } }); await page.click("[data-evedit='0']");
+  ok(await page.inputValue("#evT") === "주간 회의" && await page.inputValue("#evH") === "10:00", "form filled");
+  await page.fill("#evT", "주간 회의(변경)"); await page.fill("#evH", "11:15"); await page.click("#evAdd");
+  await reload(); let txt = await page.textContent(`.c[data-ds="${T}"]`); ok(txt.includes("주간 회의(변경)") && txt.includes("11:15") && !txt.includes("10:00"), txt);
+  await page.click(`.c[data-ds="${T}"]`, { position: { x: 40, y: 50 } }); await page.click("[data-evdel='0']"); ok(await page.isVisible(".dim"), "asks first"); await page.click("[data-evdel='0']");
+  await reload(); txt = await page.textContent(`.c[data-ds="${T}"]`); ok(!txt.includes("주간 회의"), txt);
+  await page.click(`.c[data-ds="${T}"]`, { position: { x: 40, y: 50 } }); await page.fill("#evT", "주간 회의"); await page.fill("#evH", "10:00"); await page.click("#evAdd");
+});
 await t("A06 날짜 숫자 누르면 바로 그 날짜의 데일리", async () => {
   await page.click(`.c[data-ds="${T}"] .n`); ok(await page.locator(".tabs [data-view=day].on").count() === 1);
   ok((await h1()).startsWith(`${T.slice(5, 7)}.${DD}`), await h1()); await tab("month");
@@ -199,12 +208,16 @@ await t("A19 보안: 악성 백업(일정 시간·노트 id·습관 id에 HTML, 
     "ev-${M}":{"list":[{"id":"e1","date":"${T}","time":"<img src=x onerror=\\"window.__pwned=1\\">","title":"ok"}]},
     "n-${T.slice(0, 4)}":{"list":[{"id":"x\\"><img src=x onerror=\\"window.__pwned=2\\">","title":"악성","date":"${T}","cat":"","body":""}]},
     "habits":{"list":[{"id":"h\\"><img src=x onerror=\\"window.__pwned=3\\">","name":"악성습관","start":"${T}","on":true}],"log":{}},
+    "p-${M}":{"${DD}":"https://x.test/a.png');background:url(javascript:window.__pwned=4)"},
     "settings":{"__proto__":{"polluted":1},"weekStart":1,"photos":true,"noteCats":[]},
     "__proto__":{"polluted":1},"x<y":{"a":1}}}`;
   const f = path.join(os.tmpdir(), "twd-evil.json"); fs.writeFileSync(f, evil);
   const c3 = await browser.newContext({ timezoneId: tz }); const p3 = await c3.newPage(); p3.on("pageerror", e => errors.push("A19: " + e.message));
   await p3.goto(URL0 + "#setting"); await p3.waitForSelector(".book"); const fc = p3.waitForEvent("filechooser"); await p3.click("[data-act=import]"); await (await fc).setFiles(f); await p3.waitForTimeout(300);
   for (const v of ["month", "day", "week", "habit", "notes"]) { await p3.click(`.tabs [data-view="${v}"]`); await p3.waitForTimeout(80); }
+  await p3.click(`.tabs [data-view="month"]`); await p3.click("[data-act=photo]"); await p3.waitForTimeout(100);
+  const st3 = (await p3.getAttribute(`.c[data-ds="${T}"]`, "style")) || ""; ok(!st3.includes("javascript") && !st3.includes("x.test"), "bad photo url refused: " + st3);
+  await p3.click("[data-act=photo]"); await p3.click(`.tabs [data-view="notes"]`);
   await p3.click(".nl"); await p3.waitForTimeout(200);
   ok((await p3.textContent(".page.l")).includes("악성"), "data imported");
   ok(await p3.evaluate(() => window.__pwned) === undefined, "no script ran"); ok(await p3.evaluate(() => ({}).polluted) === undefined, "no prototype pollution");
@@ -311,10 +324,12 @@ const fake = `(() => {
       if (t === "notion-create-pages") { const ps = (i.pages || []).map(() => ({ id: uuid(), url: "https://www.notion.so/x" })); return { content: [{ type: "text", text: JSON.stringify({ pages: ps }) }], payload: { pages: ps } }; }
       if (t === "notion-create-database") { const u = uuid(); return { content: [{ type: "text", text: '<database><data-source url="collection://' + u + '"></data-source></database>' }], payload: '<data-source url="collection://' + u + '">' }; }
       if (t === "notion-update-page") return { content: [{ type: "text", text: "ok" }], payload: { ok: true } };
-      if (t === "notion-query-data-sources") return { content: [], payload: { results: window.__notionRows } };
+      if (t === "notion-query-data-sources") return { content: [], payload: { results: (window.__nRowsBy || {})[i.data.data_source_url.replace("collection://", "")] || window.__notionRows } };
       if (t === "list_calendars") return { content: [], payload: { items: [{ id: "primary", summary: "내 캘린더" }, { id: "work@x", summary: "업무" }] } };
       if (t === "list_events") return { content: [], payload: { events: i.pageToken ? window.__gpage2 : window.__gev } };
       if (t === "create_event") { window.__gev.push({ id: "g" + Date.now(), summary: i.summary, start: i.allDay ? { date: i.startTime.slice(0, 10) } : { dateTime: i.startTime + "+09:00" }, end: i.allDay ? { date: i.endTime.slice(0, 10) } : { dateTime: i.endTime + "+09:00" } }); return { content: [], payload: { id: "new" } }; }
+      if (t === "update_event") { const e = window.__gev.find(x => x.id === i.eventId); if (!e) throw { code: "tool_error", message: "not found" }; if (i.summary) e.summary = i.summary; if (i.startTime) { e.start = i.allDay ? { date: i.startTime.slice(0, 10) } : { dateTime: i.startTime + "+09:00" }; e.end = i.allDay ? { date: i.endTime.slice(0, 10) } : { dateTime: i.endTime + "+09:00" }; } return { content: [], payload: { id: e.id } }; }
+      if (t === "delete_event") { window.__gev = window.__gev.filter(x => x.id !== i.eventId); return { content: [], payload: {} }; }
       return { content: [], payload: {} }; },
     watchTool(s, t, i, h) { log({ s, t, i, watch: 1 }); const w = { s, t, i, h }; window.__watch.push(w);
       setTimeout(() => h({ type: "data", result: { payload: { events: window.__gev, nextPageToken: "p2" } } }), 0); return () => { w.dead = 1; }; },
@@ -384,13 +399,13 @@ await t("B06 데일리 [노션 저장]: Diary에 전 속성 생성 → 다시 �
   ok(up && up.id === map["d:" + T] && up.p.Tomorrow === "다정한 사람", "same page updated"); ok(!(await b.textContent("#nstat")).includes("안 됨"), "flag cleared");
 });
 await t("B07 노션에서 고친 일기를 [노션에서 가져오기]로 받아옴, 이 기기에서 아직 노션 저장 안 한 날은 덮어쓰지 않음", async () => {
-  const other = DD === "01" ? "02" : "01", od = `${M}-${other}`;
-  await b.evaluate(([od, T]) => { window.__notionRows = [{ properties: { "Title": od, "date:Date:start": od, "Joy": "노션에서 고침", "To do": "[x] 노션 할일\n[ ] 둘째", "Reset": "비움\n→ 걷기" } }, { properties: { "Title": T, "date:Date:start": T, "Joy": "덮어쓰면 안 됨" } }]; }, [od, T]);
+  const other = DD === "01" ? "02" : "01", od = `${M}-${other}`, other2 = DD === "03" ? "04" : "03", od2 = `${M}-${other2}`;
+  await b.evaluate(([od, T, od2]) => { window.__notionRows = [{ properties: { "Title": od, "date:Date:start": od, "Joy": "노션에서 고침", "To do": "[x] 노션 할일\n[ ] 둘째", "Reset": "비움\n→ 걷기" } }, { properties: { "Title": T, "date:Date:start": T, "Joy": "덮어쓰면 안 됨" } }, { properties: { "Title": "글자 날짜", "Date": `${+od2.slice(0, 4)}년 ${+od2.slice(5, 7)}월 ${+od2.slice(8)}일`, "Joy": "한글 날짜" } }]; }, [od, T, od2]);
   await b.fill(`[data-bind="${K}|${DD}.log"]`, "아직 노션 저장 안 함");
   await b.click("[data-act=npull]"); await b.waitForTimeout(400);
-  const q = (await calls()).filter(x => x.t === "notion-query-data-sources").at(-1); ok(q && q.i.data.mode === "rows" && q.i.data.data_source_url.endsWith((await dsIds()).diary), "query");
+  const DI = (await dsIds()).diary, q = (await calls()).filter(x => x.t === "notion-query-data-sources" && x.i.data.data_source_url.endsWith(DI)).at(-1); ok(q && q.i.data.mode === "rows" && q.i.data.filter, "query");
   const doc = await b.evaluate(k => window.__store[k], K); ok(doc[other].joy === "노션에서 고침" && doc[other].reset === "비움" && doc[other].resetAct === "걷기", JSON.stringify(doc[other]));
-  ok(doc[other].todos[0].done === true && doc[other].todos[1].t === "둘째", "todos"); ok(doc[DD].joy !== "덮어쓰면 안 됨", "unsaved day protected");
+  ok(doc[other].todos[0].done === true && doc[other].todos[1].t === "둘째", "todos"); ok(doc[DD].joy !== "덮어쓰면 안 됨", "unsaved day protected"); ok(doc[other2] && doc[other2].joy === "한글 날짜", "written-out date parsed");
   await b.click("[data-act=nsave]"); await b.waitForTimeout(200);
 });
 await t("B08 [전부 만들기]: 올해 1월 1일~2027년 말 모든 날짜·월·주 페이지, 50개씩, 중복 없음, 다시 누르면 새로 안 만듦", async () => {
@@ -434,6 +449,27 @@ await t("B12 노트를 만들면 노션 Notes에 바로 들어가고, 본문을 
   await b.fill(".page.r textarea", "장면이 오래 남았다"); await b.waitForTimeout(3200);
   ok((await calls()).some(x => x.t === "notion-update-page" && x.i.command === "replace_content" && x.i.new_str === "장면이 오래 남았다"), "body synced");
 });
+await t("B07b 노션에서 고친 월·주 목표, 습관 체크, 습관 이름, 노트 제목도 가져옴 — 이 기기에서 아직 안 보낸 곳은 지킴", async () => {
+  const D = await dsIds(), od = `${M}-${DD === "01" ? "02" : "01"}`;
+  const [map, H, WK, nid] = await b.evaluate(() => { const s = window.__store, n = Object.values(s).find(v => v && Array.isArray(v.list) && v.list.some(x => x.title === "영화 리뷰")).list.find(x => x.title === "영화 리뷰");
+    return [s.nmap, s.habits, Object.keys(s).find(k => k.startsWith("w-")).slice(2), n.id]; });
+  const h = H.list.find(x => x.name === "스트레칭"), hp = map["h:" + h.id], np = map["n:" + nid], dash = x => x.replace(/^(.{8})(.{4})(.{4})(.{4})/, "$1-$2-$3-$4-");
+  await b.evaluate(([D, M, WK, od, hp, np]) => { window.__notionRows = []; window.__nRowsBy = {
+    [D.planner]: [{ properties: { "Title": M, "Category": "Month", "date:Date:start": M + "-01", "Goal": "[x] 노션 목표\n[ ] 둘째 목표", "Period Log": "노션 월 기록" } },
+      { properties: { "Title": "Week", "Category": "Week", "date:Date:start": WK, "Goal": "[ ] 노션 주간", "Period Log": "노션 주 기록", "Comment": "노션 메모" } }],
+    [D.habitlog]: [{ properties: { "Title": od, "date:Date:start": od, "Done": "스트레칭", "Count": 1 } }],
+    [D.habits]: [{ url: "https://www.notion.so/" + hp, properties: { "Name": "스트레칭 10분", "Icon": "🧘", "Category": "건강", "On": "__YES__" } }],
+    [D.notes]: [{ id: np, properties: { "Name": "영화 리뷰(노션)", "Category": "영화" } }] }; }, [D, M, WK, od, hp, dash(np)]);
+  await btab("month"); await b.fill(".memo textarea", "이 기기 기록"); await btab("day"); await b.click("[data-act=npull]"); await b.waitForTimeout(400);
+  let s = await b.evaluate(() => window.__store); ok(s["m-" + M].periodLog === "이 기기 기록", "unsent month kept: " + s["m-" + M].periodLog);
+  ok(s["w-" + WK].memo === "노션 메모" && s["w-" + WK].goals[0].t === "노션 주간" && s["w-" + WK].periodLog === "노션 주 기록", JSON.stringify(s["w-" + WK]));
+  ok(s.habits.log[h.id][od] === true, "habit log pulled"); const h2 = s.habits.list.find(x => x.id === h.id); ok(h2.name === "스트레칭 10분" && h2.icon === "🧘", JSON.stringify(h2));
+  ok(Object.values(s).some(v => v && Array.isArray(v.list) && v.list.some(x => x.id === nid && x.title === "영화 리뷰(노션)")), "note title pulled");
+  ok((await b.textContent("#toast")).includes("가져왔어요"), await b.textContent("#toast"));
+  await b.waitForTimeout(3000); await b.click("[data-act=npull]"); await b.waitForTimeout(400); s = await b.evaluate(() => window.__store);
+  ok(s["m-" + M].periodLog === "노션 월 기록" && s["m-" + M].goals[0].t === "노션 목표" && s["m-" + M].goals[0].done === true, JSON.stringify(s["m-" + M]));
+  await b.evaluate(() => { window.__nRowsBy = {}; });
+});
 await t("B13 노션 페이지 갱신 실패: 지워진 페이지면 새로 만들고, 다른 오류면 중복 생성하지 않음", async () => {
   await btab("day"); await b.evaluate(() => { window.__failNext = { code: "tool_error", message: "validation_error: bad property" }; });
   const n0 = (await calls()).filter(x => x.t === "notion-create-pages").length; await b.click("[data-act=nsave]"); await b.waitForTimeout(250);
@@ -462,6 +498,29 @@ await t("B16 날짜 눌러 일정 추가 → create_event(선택 캘린더·1시
   ok((await calls()).some(x => x.t === "invalidate"), "refetch"); await btab("day"); ok((await b.textContent(".page.l")).includes("점심 약속"), "shown");
   await b.evaluate(() => { window.__gev[0].summary = "구글에서 고침"; window.__watch.forEach(w => !w.dead && w.h({ type: "data", result: { payload: { events: window.__gev } } })); });
   await b.waitForTimeout(150); ok((await b.textContent(".page.l")).includes("구글에서 고침"), "edit in Google reflected"); await btab("month");
+});
+await t("B16b 구글 일정 고치기·지우기: update_event(같은 일정 번호·선택 캘린더·새 시간) → 반영, delete_event → 사라짐", async () => {
+  await b.click(`.c[data-ds="${T}"]`, { position: { x: 40, y: 70 } }); const rows = await b.$$eval(".dim .ck .in", e => e.map(x => x.textContent)); const i = rows.indexOf("구글에서 고침"); ok(i >= 0, rows.join("|"));
+  await b.click(`[data-evedit='${i}']`); await b.fill("#evT", "고친 구글 일정"); await b.fill("#evH", "11:00"); await b.click("#evAdd"); await b.waitForTimeout(300);
+  const u = (await calls()).filter(x => x.t === "update_event").at(-1); ok(u && u.i.eventId === "g1" && u.i.summary === "고친 구글 일정" && u.i.startTime === `${T}T11:00:00` && u.i.endTime === `${T}T12:00:00` && u.i.calendarId === "work@x", JSON.stringify(u && u.i));
+  let txt = await b.textContent(`.c[data-ds="${T}"]`); ok(txt.includes("고친 구글 일정") && txt.includes("11:00"), txt);
+  await b.click(`.c[data-ds="${T}"]`, { position: { x: 40, y: 70 } }); const r2 = await b.$$eval(".dim .ck .in", e => e.map(x => x.textContent)); const j = r2.indexOf("고친 구글 일정");
+  await b.click(`[data-evdel='${j}']`); await b.click(`[data-evdel='${j}']`); await b.waitForTimeout(300);
+  const dl = (await calls()).filter(x => x.t === "delete_event").at(-1); ok(dl && dl.i.eventId === "g1" && dl.i.calendarId === "work@x", JSON.stringify(dl && dl.i));
+  txt = await b.textContent(`.c[data-ds="${T}"]`); ok(!txt.includes("고친 구글 일정"), txt);
+});
+await t("B21 노션 자동 반영 실패: 잠시 뒤 스스로 다시 보내고, 끝내 못 보내면 다음에 열 때 보냄", async () => {
+  await btab("month"); const n0 = (await calls()).length;
+  await b.evaluate(() => { window.__failNext = "server_unavailable"; }); await b.fill(".memo textarea", "재시도 확인");
+  await b.waitForTimeout(3000); ok((await b.textContent("#toast")).includes("다시 보낼게요"), await b.textContent("#toast"));
+  ok((await b.evaluate(() => window.__store.npend || {}))["m:" + M], "remembered as unsent");
+  await b.waitForTimeout(3800); let u = lastProps((await calls()).slice(n0), x => x.p.Category === "Month" && x.p.Title === M); ok(u && u.p["Period Log"] === "재시도 확인", "retried");
+  ok(!(await b.evaluate(() => window.__store.npend || {}))["m:" + M], "cleared after success");
+  await b.evaluate(() => { window.__failNext = "needs_reauth"; }); await b.fill(".memo textarea", "다음에 열 때"); await b.waitForTimeout(3000);
+  ok((await b.textContent("#toast")).includes("다음에 열 때"), await b.textContent("#toast")); const n1 = (await calls()).length;
+  await breload(); await b.waitForTimeout(3200);
+  u = lastProps((await calls()).slice(n1), x => x.p.Category === "Month" && x.p.Title === M); ok(u && u.p["Period Log"] === "다음에 열 때", "resent after reopening");
+  ok(!(await b.evaluate(() => window.__store.npend || {}))["m:" + M], "cleared");
 });
 await t("B17 아티팩트 사진: assets 저장소에 올리고 주소만 기록, 새로고침 뒤 표시, 노션에는 안 보냄", async () => {
   await b.click("[data-act=photo]"); const fc = b.waitForEvent("filechooser"); await b.click(`.c[data-ds="${T}"]`, { position: { x: 40, y: 70 } }); await (await fc).setFiles({ name: "a.png", mimeType: "image/png", buffer: PNG }); await b.waitForTimeout(400);
