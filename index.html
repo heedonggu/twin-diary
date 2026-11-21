@@ -65,8 +65,14 @@ textarea:focus,.in:focus{border-bottom-color:var(--ink)}
 .fill{display:flex;flex-direction:column}.fill .cal{flex:1 0 auto;grid-template-rows:auto repeat(var(--rows),minmax(92px,1fr))}
 .memo{border:1px solid var(--line);border-left:0;border-top:1px solid var(--ink);padding:6px 8px}
 /* year */
-.yr{display:grid;grid-template-columns:1fr 1fr;gap:14px 18px}
-.mb{border-top:1px solid var(--ink);padding-top:6px;min-height:130px}
+.yr{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,1fr);grid-auto-flow:column;gap:1px;background:#9c978c;border:1px solid #9c978c;flex:1}
+.mb{background:var(--paper);padding:8px 10px;min-height:150px;min-width:0}
+.mk{border:1px solid var(--ink);background:none;color:var(--ink);padding:1px 7px;font-size:11px;border-radius:2px;margin-left:6px;min-height:24px}
+@media (min-width:640px){.page{display:flex;flex-direction:column}.page>*{flex-shrink:0}.page>.pf{margin-top:auto}}
+.pf{min-height:34px}.yr+.pf{border-top:0}
+.lbl.sec{border-top:1px solid var(--ink);padding-top:10px;margin-top:12px}
+.dpg textarea{background:none;border-bottom:0;resize:none;line-height:22px;min-height:44px;font-size:13px}.dpg textarea::placeholder{color:var(--line)}
+.mb h3 .mn{color:var(--ink);font-size:15px;font-weight:800}.mb h3 .mn.cur{text-decoration:underline;text-underline-offset:3px}
 .mb h3{margin:0 0 4px;font-size:13px;display:flex;justify-content:space-between;cursor:pointer}
 .mb h3 span{color:var(--mute);font-weight:400;font-size:11px}
 .mb li{font-size:11.5px;list-style:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -84,13 +90,14 @@ textarea:focus,.in:focus{border-bottom-color:var(--ink)}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{border:1px solid var(--line);background:none;border-radius:999px;padding:6px 12px;font-size:12px;min-height:34px}
 .chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.hrow .chip{border-radius:2px;padding:3px 10px;min-height:28px}
 .foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:20px;border-top:1px solid var(--ink);padding-top:8px;font-size:11px;color:var(--mute);flex-wrap:wrap}
 /* habit */
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
 .stats div b{display:block;font-size:22px}
 .stats div span{font-size:10px;color:var(--mute)}
-.heat{display:grid;grid-template-columns:24px repeat(31,minmax(0,1fr));gap:2px;font-size:8px;color:var(--mute)}
-.heat>*{min-width:0;overflow:hidden;white-space:nowrap}.heat i{aspect-ratio:1;background:var(--soft);border-radius:2px;display:block}
+.heat{display:grid;grid-template-rows:repeat(7,auto);grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:2px}.heatm{display:flex;justify-content:space-between;font-size:9px;color:var(--mute);margin-top:6px}.heat i.td{outline:1.5px solid var(--ink)}
+.heat>*{min-width:0;aspect-ratio:1}.heat i{aspect-ratio:1;background:var(--soft);border-radius:2px;display:block}
 .hg{width:100%;border-collapse:collapse;font-size:10px;table-layout:fixed}
 .hg th,.hg td{border-bottom:1px solid var(--soft);text-align:center;padding:0;height:30px}
 .hg th.nm,.hg td.nm{text-align:left;width:96px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:4px;cursor:pointer}
@@ -111,7 +118,7 @@ textarea:focus,.in:focus{border-bottom-color:var(--ink)}
 .dlg h2{margin:0 0 10px;font-size:15px;display:flex;justify-content:space-between;border-bottom:1.5px solid var(--ink);padding-bottom:6px}
 .dlg label{display:block;font-size:10px;letter-spacing:.14em;color:var(--mute);margin-top:12px}
 .dlg .in,.dlg select{width:100%;border:0;border-bottom:1px solid var(--line);background:none;padding:8px 0;min-height:38px}
-#toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:#fff;padding:8px 14px;border-radius:4px;font-size:12px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:60;max-width:90vw}
+#toast{position:fixed;left:calc(16px + env(safe-area-inset-left));top:calc(12px + env(safe-area-inset-top));background:var(--paper);color:var(--ink);box-shadow:0 2px 10px rgba(0,0,0,.12);padding:10px 16px;border-radius:2px;font-size:12px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:60;max-width:90vw}
 #toast.on{opacity:1}
 .set section{border-top:1px solid var(--ink);padding:10px 0 16px}
 .set h3{margin:0 0 8px;font-size:13px}
@@ -120,6 +127,21 @@ textarea:focus,.in:focus{border-bottom-color:var(--ink)}
 .seg button.on{background:var(--ink);color:#fff}
 .empty{color:var(--mute);text-align:center;padding:40px 0;font-size:12px}
 .loading{margin:auto;color:var(--mute);font-size:13px}
+/* original-layout pieces */
+.ubar{position:sticky;top:0;background:var(--ink);color:#fff;border-radius:6px;padding:6px 8px 6px 14px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px;z-index:5;margin:0 0 10px}.ubar>span{flex:1}
+.ubar button{border:1px solid rgba(255,255,255,.35);background:none;color:#fff;border-radius:4px;padding:6px 10px;font-size:12px;min-height:32px}
+.ubar button[data-act=nsave]{background:#fff;color:var(--ink)}
+.dcols{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}.dcols>div{min-width:0}
+.ncat{display:flex;gap:8px;align-items:center;padding:9px 0 5px;cursor:pointer;font-size:13px}.ncat i{flex:1;border-bottom:1px dotted var(--mute);transform:translateY(-3px)}
+.hgrp .lbl{margin-top:12px}.hi{width:26px;font-size:18px;text-align:center;flex:0 0 auto}
+.hrow{gap:8px;padding:6px 0;border-bottom:1px solid var(--soft)}.hrow .lbl{margin:0}
+.emo{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:2px;margin:6px 0;border:1px solid var(--line);border-radius:4px;padding:6px}.emo button{border:0;background:none;font-size:18px;padding:4px 0;min-width:0;border-radius:4px}.emo button:hover{background:var(--soft)}
+.emo.pop{position:absolute;right:0;top:-4px;width:380px;max-width:100%;z-index:20;background:var(--paper);box-shadow:0 4px 18px rgba(0,0,0,.14);border-radius:2px;margin:0}
+.mms{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(2,auto);grid-auto-flow:column;gap:16px 12px;margin-top:12px}
+.mm{min-width:0}.mmh{display:flex;justify-content:space-between;border-bottom:1px solid var(--ink);font-size:12px;margin-bottom:3px}.mmh span{color:var(--mute);font-size:11px}
+.mmg{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:1px;font-size:8px;text-align:center}
+.mmg button{border:0;background:none;padding:0;aspect-ratio:1;font-size:9px;border-radius:2px;min-width:0}
+.mmg button.on{background:var(--ink);color:#fff}.mmg button.td{box-shadow:inset 0 0 0 1.5px var(--ink);border-radius:50%}.mmg button.fut{opacity:.35}
 /* ---- narrow: phones, Flip, Fold cover ---- */
 @media (max-width:639px){
   #app{flex-direction:column}
@@ -135,6 +157,10 @@ textarea:focus,.in:focus{border-bottom-color:var(--ink)}
   .yr{grid-template-columns:1fr}
   .stats{grid-template-columns:repeat(2,1fr)}
   .hg th.nm,.hg td.nm{width:70px}
+  .yr{grid-template-rows:none;grid-auto-flow:row}
+  .dcols{grid-template-columns:1fr}
+  .mms{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none;grid-auto-flow:row}
+  .emo{grid-template-columns:repeat(8,minmax(0,1fr))}
 }
 @media (max-width:360px){ .ph h1{font-size:20px} .cal .hd{font-size:8px;letter-spacing:0} .page{padding:12px 10px} }
 @media (max-width:359px){ .ph{gap:4px;margin-bottom:8px;min-height:0;padding-bottom:4px} .ph h1{font-size:16px} .nav{font-size:9px;letter-spacing:.04em} .cal .c{min-height:38px} .page{padding:8px 8px} }
@@ -225,7 +251,7 @@ function loadLocal(){const o={};try{for(let i=0;i<localStorage.length;i++){const
 
 /* ================= state ================= */
 const VIEWS=["year","month","week","day","notes","habit","setting"];
-const st={view:"month",date:todayStr(),photo:false,note:null,hmonth:ym(new Date())};
+const st={view:"month",date:todayStr(),photo:false,hmonth:ym(new Date()),habit:null,hicon:false,hyear:new Date().getFullYear(),stab:"notion",nmonth:null,nfold:{},bodyEdit:false};
 const cfg=()=>S.get("settings",{weekStart:1,photos:true,gcal:false,calId:"",noteCats:["책","영화","맛집","생각"],notion:null});
 const mqWide=matchMedia("(min-width:640px), (horizontal-viewport-segments:2)");
 let CL=null,MCP=null,ASSETS=null,DL=null;
@@ -244,9 +270,9 @@ const weekNo=d=>isoWeek(addDays(weekStart(d),cfg().weekStart===0?1:0))[1];
 const habits=()=>S.get("habits",{list:[],log:{}});
 const notesDoc=y=>S.get("n-"+y,{list:[]});
 const localEv=k=>S.get("ev-"+k,{list:[]});
-const hasDiary=ds=>{const d=dayDoc(ds)[ds.slice(8)];return !!d&&Object.entries(d).some(([k,v])=>k!=="ns"&&k!=="ed"&&(Array.isArray(v)?v.length:v))};
+const hasDiary=ds=>{const d=dayDoc(ds)[ds.slice(8)];return !!d&&Object.entries(d).some(([k,v])=>k!=="ns"&&k!=="ed"&&k!=="base"&&(Array.isArray(v)?v.length:v))};
 const isUnsaved=ds=>{const d=dayDoc(ds)[ds.slice(8)];return !!(cfg().notion&&d&&d.ed&&(!d.ns||d.ed>d.ns))};
-function markUnsaved(ds){day(ds).ed=new Date().toISOString();S.save("d-"+ds.slice(0,7),500,ds.slice(8));const el=$("#nstat");if(el&&cfg().notion)el.textContent="노션에 저장 안 됨"}
+function markUnsaved(ds){day(ds).ed=new Date().toISOString();S.save("d-"+ds.slice(0,7),500,ds.slice(8));if(cfg().notion&&st.view==="day"){updUbar();pendingRender=true}}
 
 /* ================= Google Calendar (artifact connector) ================= */
 const gc={byDate:{},watches:{},order:[],err:null};
@@ -363,7 +389,7 @@ async function nUpsert(mapKey,dsKey,props,content){
   map[mapKey]=nid;S.save("nmap",0,mapKey);return nid}
 async function saveDayNotion(ds,btn){
   if(btn)btn.disabled=true;
-  try{await nUpsert("d:"+ds,"diary",diaryProps(ds));day(ds).ns=new Date().toISOString();S.save("d-"+ds.slice(0,7),0,ds.slice(8));toast("노션에 저장했어요")}
+  try{const d=day(ds);await nUpsert("d:"+ds,"diary",diaryProps(ds),d.body||null);d.ns=new Date().toISOString();delete d.base;S.save("d-"+ds.slice(0,7),0,ds.slice(8));toast("노션에 저장했어요")}
   catch(e){toast(e.code?mcpMsg(e,NOTION):(e.message||String(e)))}
   render()}
 const autoQ={},autoN={};
@@ -411,7 +437,7 @@ async function pullNotionMonth(k,force){const n=cfg().notion;if(!n||!MCP||(pulle
     for(const[col,f]of Object.entries(NFIELD))if(col in row)dirty|=setIf(d,f,cellText(row[col]));
     if("Reset" in row){const[a,...b]=cellText(row.Reset).split("\n→ ");dirty|=setIf(d,"reset",a)|setIf(d,"resetAct",b.join("\n→ "))}
     if("To do" in row)dirty|=setIf(d,"todos",ckLines(cellText(row["To do"])));
-    if(dirty){d.ns=new Date().toISOString();d.ed=d.ns;S.save("d-"+k,0,ds.slice(8));c++}}return c});
+    if(dirty){d.ns=new Date().toISOString();d.ed=d.ns;delete d.base;S.save("d-"+k,0,ds.slice(8));c++}}return c});
   await step(async()=>{let c=0;for(const row of await nRows("planner",rng,o=>"Category" in o&&"Goal" in o)){const cat=cellText(row.Category),ds=dateOf(cellText(row["date:Date:start"])||cellText(row.Date));
     if(cat==="Month"&&/^\d{4}-\d\d/.test(ds)){const mk=ds.slice(0,7);if(unsent("m:"+mk))continue;const M=monthDoc(mk);
       if(setIf(M,"goals",ckLines(cellText(row.Goal)))|("Period Log" in row&&setIf(M,"periodLog",cellText(row["Period Log"])))){S.save("m-"+mk,0);c++}}
@@ -436,14 +462,15 @@ async function notionCreateAll(btn){
   const n=cfg().notion;if(!n){toast("먼저 노션을 연결하세요");return}
   const until=parse(($("#untilY")&&$("#untilY").value||"2027")+"-12-31");const map=NM();
   const jobs=[];
-  for(let d=new Date(new Date().getFullYear(),0,1);d<=until;d=addDays(d,1)){const ds=ymd(d);if(!map["d:"+ds])jobs.push(["d:"+ds,"diary",{"Title":ds,"date:Date:start":ds,"date:Date:is_datetime":0}])}
+  for(let d=new Date(new Date().getFullYear(),0,1);d<=until;d=addDays(d,1)){const ds=ymd(d);if(!map["d:"+ds])jobs.push(["d:"+ds,"diary",{"Title":ds,"date:Date:start":ds,"date:Date:is_datetime":0}]);
+    if(!map["hl:"+ds])jobs.push(["hl:"+ds,"habitlog",{"Title":ds,"date:Date:start":ds,"date:Date:is_datetime":0,"Done":"","Count":0}])}
   for(let m=new Date(new Date().getFullYear(),0,1);m<=until;m=addMonths(m,1)){const k=ym(m);if(!map["m:"+k])jobs.push(["m:"+k,"planner",plannerProps("Month",k)])}
   for(let w=weekStart(new Date(new Date().getFullYear(),0,1));w<=until;w=addDays(w,7)){const k=ymd(w);if(!map["w:"+k])jobs.push(["w:"+k,"planner",plannerProps("Week",k)])}
   if(!jobs.length){toast("이미 모든 페이지가 있어요");return}
   btn.disabled=true;let done=0;
   try{
-    for(const dsKey of ["diary","planner"]){const list=jobs.filter(j=>j[1]===dsKey);
-      for(let i=0;i<list.length;i+=50){const chunk=list.slice(i,i+50);btn.textContent=`만드는 중… ${done}/${jobs.length}`;
+    for(const dsKey of ["diary","habitlog","planner"]){const list=jobs.filter(j=>j[1]===dsKey);
+      for(let i=0;i<list.length;i+=50){const chunk=list.slice(i,i+50);btn.textContent=`만드는 중… ${done}/${jobs.length}`;toast(`${{diary:"Diary",habitlog:"Habit",planner:"Planner"}[dsKey]} 페이지 만드는 중… ${done}/${jobs.length}`);
         const r=await MCP.callTool(NOTION,"notion-create-pages",{parent:{type:"data_source_id",data_source_id:n.ds[dsKey]},pages:chunk.map(j=>({properties:j[2]})),allow_async:false});
         const ids=idsFrom(r,[n.ds[dsKey],n.page]);if(ids.length<chunk.length)throw{message:`노션 응답에서 페이지 번호를 ${ids.length}/${chunk.length}개만 읽었어요`};
         chunk.forEach((j,ix)=>{map[j[0]]=ids[ix];S.mark("nmap",j[0])});done+=chunk.length;S.save("nmap",0)}}
@@ -486,24 +513,22 @@ function eventDialog(ds){const evs=eventsOn(ds);const g=gcOn();
     if(ok)d.remove();else b.disabled=false};
   d.querySelector("#evAdd").onclick=go;d.querySelector("#evT").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.isComposing)go()});
   d.querySelector("[data-go-day]").onclick=()=>{d.remove();go2("day",ds)}}
-function habitDialog(id){const h=habits().list.find(x=>x.id===id);if(!h)return;
-  const d=dialog(`<h2>습관 <button class="lnk" data-close>닫기</button></h2>
-  <label>아이콘 (이모지)</label><input class="in" id="hI" value="${esc(h.icon||"")}" maxlength="4">
-  <label>이름</label><input class="in" id="hN" value="${esc(h.name)}" maxlength="60">
-  <label>분류</label><input class="in" id="hC" value="${esc(h.cat||"")}" placeholder="건강, 공부…" maxlength="30">
-  <label>시작일</label><input class="in" id="hS" type="date" value="${esc(h.start||todayStr())}">
-  <label><input type="checkbox" id="hO" ${h.on===false?"":"checked"}> 진행 중 (끄면 체크 목록에서 빠져요)</label>
-  <div class="row" style="justify-content:space-between;margin-top:16px"><button class="btn g" id="hDel">삭제</button><button class="btn" id="hSave">저장</button></div>`);
-  d.querySelector("#hSave").onclick=()=>{h.icon=d.querySelector("#hI").value.trim();h.name=d.querySelector("#hN").value.trim()||h.name;h.cat=d.querySelector("#hC").value.trim();h.start=d.querySelector("#hS").value||h.start;h.on=d.querySelector("#hO").checked;S.save("habits",0,"list");syncHabit(h);d.remove();render()};
-  const del=d.querySelector("#hDel");del.onclick=()=>{if(del.dataset.sure){const H=habits();H.list=H.list.filter(x=>x.id!==id);H.log[id]={};S.save("habits",0);d.remove();render()}else{del.dataset.sure=1;del.textContent="한 번 더 누르면 삭제"}}}
-function noteDialog(){const c=cfg();
+function noteDialog(ds){const c=cfg();
   const d=dialog(`<h2>새 노트 <button class="lnk" data-close>닫기</button></h2>
   <input class="in" id="nT" placeholder="제목" maxlength="200">
-  <div class="row"><input class="in" id="nD" type="date" value="${todayStr()}" style="flex:1"><select id="nC" style="flex:1">${["",...c.noteCats].map(x=>`<option value="${esc(x)}">${x?esc(x):"분류 없음"}</option>`).join("")}</select></div>
+  <div class="row"><input class="in" id="nD" type="date" value="${esc(ds||todayStr())}" style="flex:1"><select id="nC" style="flex:1">${["",...c.noteCats].map(x=>`<option value="${esc(x)}">${x?esc(x):"태그 없음"}</option>`).join("")}</select></div>
   <div class="row" style="justify-content:space-between;margin-top:16px"><span class="mute sm">${c.notion?"만들면 노션 Notes에 바로 들어가요":""}</span><button class="btn" id="nGo">만들기</button></div>`);
   const go=()=>{const t=d.querySelector("#nT").value.trim();if(!t){d.querySelector("#nT").focus();return}const date=d.querySelector("#nD").value||todayStr();
-    const n={id:uid(),title:t,date,cat:d.querySelector("#nC").value,body:""};notesDoc(date.slice(0,4)).list.push(n);S.save("n-"+date.slice(0,4),0,"list");syncNote(n);st.note=n.id;st.date=date;d.remove();render()};
+    const n={id:uid(),title:t,date,cat:d.querySelector("#nC").value,body:""};notesDoc(date.slice(0,4)).list.push(n);S.save("n-"+date.slice(0,4),0,"list");syncNote(n);
+    if(st.view==="notes"){st.date=date;st.nmonth=null}d.remove();render();noteEdit(n.id)};
   d.querySelector("#nGo").onclick=go;d.querySelector("#nT").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.isComposing)go()})}
+/* a note opens as a sheet: title · date · category · link to its Notion page · body */
+function noteEdit(id){const n=findNote(id);if(!n)return;const y=n.date.slice(0,4),k="n-"+y,i=notesDoc(y).list.indexOf(n),pg=NM()["n:"+n.id],cats=cfg().noteCats;
+  const d=dialog(`<h2 style="align-items:center;gap:8px"><input class="in" style="font-size:17px;font-weight:800;border:0;padding:0;flex:1;min-width:0" value="${esc(n.title)}" data-bind="${k}|list.${i}.title" aria-label="제목" maxlength="200"><button class="lnk" data-close>닫기</button></h2>
+  <div class="row sm mute" style="gap:6px"><input class="in" type="date" value="${esc(n.date)}" data-act-change="notedate" data-id="${esc(n.id)}" style="flex:1;min-width:120px"><span>·</span><select data-bind="${k}|list.${i}.cat" aria-label="분류" style="flex:1;border:0;border-bottom:1px solid var(--line);background:none;min-height:38px">${["",...cats,...(n.cat&&!cats.includes(n.cat)?[n.cat]:[])].map(x=>`<option ${x===(n.cat||"")?"selected":""} value="${esc(x)}">${x?esc(x):"태그 없음"}</option>`).join("")}</select>${pg?`<span>·</span><a href="https://www.notion.so/${esc(pg)}" target="_blank" rel="noopener">노션에서 열기↗</a>`:""}</div>
+  <textarea style="min-height:40vh;margin-top:12px" data-bind="${k}|list.${i}.body" placeholder="길게 남기고 싶은 이야기">${esc(n.body)}</textarea>
+  <div class="row" style="justify-content:space-between;margin-top:12px"><button class="btn g" data-act="delnote" data-id="${esc(n.id)}">삭제</button><span class="row" style="gap:8px">${cfg().notion?`<button class="btn" data-act="nnote" data-id="${esc(n.id)}">노션 저장</button>`:""}<button class="btn g" data-close>완료</button></span></div>`);
+  d.addEventListener("click",e=>{if(e.target===d||e.target.closest("[data-close]"))render()})}
 
 /* ================= render pieces ================= */
 function checklist(key,path,list,ph){return `${list.map((it,i)=>`<div class="ck ${it.done?"done":""}"><input type="checkbox" ${it.done?"checked":""} data-check="${key}|${path}.${i}.done" aria-label="완료"><input class="in" value="${esc(it.t)}" data-bind="${key}|${path}.${i}.t"><button class="x" data-act="rmitem" data-k="${key}" data-p="${path}" data-i="${i}" aria-label="삭제">×</button></div>`).join("")}
@@ -512,15 +537,12 @@ const ta=(key,path,ph="",rows=3)=>`<textarea rows="${rows}" data-bind="${key}|${
 const head=(title,sub,prev,next,extra="")=>`<div class="ph"><h1>${title}${sub?`<small>${sub}</small>`:""}</h1><div class="nav">${extra}${prev?`<button data-act="nav" data-n="-1">◂ PREV</button><span>|</span><button data-act="nav" data-n="1">NEXT ▸</button>`:""}</div></div>`;
 function evLines(ds,max=3){const e=eventsOn(ds);return e.slice(0,max).map(x=>`<div class="ev">${x.time?`<b>${esc(x.time)}</b>`:""}${esc(x.title)}</div>`).join("")+(e.length>max?`<div class="ev mute">+${e.length-max}</div>`:"")}
 
-/* YEAR */
-function vYear(){const y=parse(st.date).getFullYear();const blk=m=>{const k=`${y}-${pad(m+1)}`;ensureMonth(k);const md=monthDoc(k);let evs=[];let rec=0;
-    for(let d=1;d<=daysIn(y,m);d++){const ds=`${k}-${pad(d)}`;evs.push(...eventsOn(ds).map(e=>({...e,d})));if(hasDiary(ds))rec++}
-    return `<div class="mb"><h3 data-act="openm" data-k="${k}">${MON[m]} <span>${pad(m+1)} · 기록 ${rec}일</span></h3><ul>
-    ${md.goals.slice(0,4).map(g=>`<li>${g.done?"☑":"☐"} ${esc(g.t)}</li>`).join("")}
-    ${evs.slice(0,5).map(e=>`<li class="mute">${e.d}일 ${esc(e.title)}</li>`).join("")}
-    ${!md.goals.length&&!evs.length?`<li class="mute">목표·일정 없음</li>`:""}</ul></div>`};
-  const h=head(`${y}`,"INDEX",true);
-  return[h+`<div class="yr">${[0,1,2,3,4,5].map(blk).join("")}</div>`,`<div class="ph"><h1>&nbsp;</h1></div><div class="yr">${[6,7,8,9,10,11].map(blk).join("")}</div>`]}
+/* YEAR — "2026 Goal": a goal box per month, filled down the columns, with [만들기] where the month has no Notion page */
+function vYear(){const y=parse(st.date).getFullYear(),cm=todayStr().slice(0,7),miss=cfg().notion&&MCP,map=NM();
+  const blk=m=>{const k=`${y}-${pad(m+1)}`,md=monthDoc(k);
+    return `<div class="mb"><h3 data-act="openm" data-k="${k}"><span class="mn${k===cm?" cur":""}">${MON[m]}</span><span>${pad(m+1)}</span></h3>
+    ${miss&&!map["m:"+k]?`<p class="sm mute" style="margin:6px 0">페이지 없음<button class="mk" data-act="mkm" data-k="${k}">만들기</button></p>`:checklist("m-"+k,"goals",md.goals,"목표 추가")}</div>`};
+  return[head(`${y}`,"Goal",!mqWide.matches)+`<div class="yr">${[0,1,2,3,4,5].map(blk).join("")}</div>`,(mqWide.matches?head("&nbsp;","",true):"")+`<div class="yr">${[6,7,8,9,10,11].map(blk).join("")}</div>`]}
 
 /* MONTH */
 function vMonth(){const d0=parse(st.date),y=d0.getFullYear(),m=d0.getMonth(),k=ym(d0);ensureMonth(k);ensureMonth(ym(addMonths(d0,-1)));ensureMonth(ym(addMonths(d0,1)));
@@ -534,7 +556,7 @@ function vMonth(){const d0=parse(st.date),y=d0.getFullYear(),m=d0.getMonth(),k=y
       if(memoRows&&ri===0)h+=`<div class="memo" style="grid-row:span ${weeks.length}">${memoCol(k,pm)}</div>`});
     return h+"</div>"};
   const cam=cfg().photos?`<button data-act="photo" title="사진 다이어리" aria-pressed="${pm}" style="${pm?"color:var(--ink)":""}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 7h3l2-2.5h6L17 7h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.6"/></svg></button>`:"";
-  if(mqWide.matches)return["<!--fill-->"+head(MON[m],y,false,false,cam)+grid(cols.slice(0,4),true,false),"<!--fill-->"+head("&nbsp;","",true)+grid(cols.slice(4),false,true)];
+  if(mqWide.matches)return["<!--fill-->"+head(MON[m],y,false,false)+grid(cols.slice(0,4),true,false),"<!--fill-->"+head(cam||"&nbsp;","",true)+grid(cols.slice(4),false,true)];
   return[head(MON[m],y,true,false,cam)+grid(cols,false,false),`<div class="lbl">${pm?"KEYWORD DIARY":"MEMO"}</div>`+memoCol(k,pm)]}
 function memoCol(k,pm){const md=monthDoc(k);
   if(pm){const[y,m]=k.split("-").map(Number);let h=`<div class="lbl">KEYWORD</div>`;for(let d=1;d<=daysIn(y,m-1);d++)h+=`<div class="ck"><span class="sm mute" style="width:18px">${d}</span><input class="in" maxlength="40" value="${esc(md.keywords[pad(d)]||"")}" data-bind="m-${k}|keywords.${pad(d)}" placeholder=""></div>`;return h}
@@ -552,66 +574,114 @@ function vWeek(){const d0=parse(st.date),s=weekStart(d0),e=addDays(s,6),wk=weekK
     ${act.length?`<div class="sm mute">습관 ${hd}/${act.length}</div>`:""}</div></div>`}
   return[L,R]}
 
-/* DAY */
-function vDay(){const ds=st.date,dt=parse(ds),dk="d-"+ds.slice(0,7),dd=ds.slice(8),d=day(ds),P0=photos(ds.slice(0,7))[dd],P=okPhoto(P0)?P0:"";ensureMonth(ds.slice(0,7));pullNotionMonth(ds.slice(0,7));
-  const H=habits(),act=H.list.filter(h=>h.on!==false&&(!h.start||h.start<=ds));const n=cfg().notion;
-  const L=head(`${pad(dt.getMonth()+1)}.${pad(dt.getDate())}`,`${DOW[dt.getDay()]} · ${dt.getFullYear()}`,!mqWide.matches)+
-   `<div class="row" style="align-items:stretch"><div style="flex:1;min-width:180px"><div class="tm"><span>WAKE UP</span><input type="time" value="${esc(d.wake||"")}" data-bind="${dk}|${dd}.wake"><span>IN BED</span><input type="time" value="${esc(d.bed||"")}" data-bind="${dk}|${dd}.bed"></div>
-   <div class="lbl">SLEEP JOURNAL</div>${ta(dk,dd+".sleep","잠은 어땠나요",2)}</div>
-   ${cfg().photos?`<div class="photo" style="width:120px;${P?`background-image:url('${esc(P)}')`:""}" data-act="dphoto" data-ds="${ds}" role="button" aria-label="사진">${P?"":"＋ 사진"}</div>`:""}</div>
-   <div class="lbl">MORNING NOTE</div>${ta(dk,dd+".morning","아침의 생각",3)}
-   <div class="lbl">TO DO</div>${checklist(dk,dd+".todos",d.todos||[],"할 일 추가")}
-   <div class="lbl">SCHEDULE <button class="lnk" data-act="cell" data-ds="${ds}">＋ 일정</button></div>${eventsOn(ds).map(e=>`<div class="ev" style="font-size:12px">${e.time?`<b>${esc(e.time)}</b>`:""}${esc(e.title)}</div>`).join("")||`<div class="sm mute">일정 없음</div>`}
-   <div class="lbl">HABIT</div>${act.length?`<div class="chips">${act.map(h=>`<button class="chip ${H.log[h.id]&&H.log[h.id][ds]?"on":""}" data-act="hab" data-h="${esc(h.id)}" data-ds="${ds}">${esc(h.icon||"")} ${esc(h.name)}</button>`).join("")}</div>`:`<div class="sm mute">습관 탭에서 습관을 만들어요</div>`}`;
-  const R=(mqWide.matches?head("&nbsp;","",true):"")+
-   `<div class="lbl">LOG</div>${ta(dk,dd+".log","오늘 있었던 일",5)}
-   <div class="lbl">JOY <span class="mute" style="letter-spacing:0;text-transform:none">잠깐이라도 웃었던 순간</span></div>${ta(dk,dd+".joy","",3)}
-   <div class="lbl">RESET <span class="mute" style="letter-spacing:0;text-transform:none">붙잡고 있는 생각 비우기</span></div>${ta(dk,dd+".reset","",3)}
+/* DAY — unsaved edits keep a snapshot (base) of the last saved state, so they can be counted, marked and reverted */
+const strip=d=>{const o={...d};delete o.base;delete o.ns;delete o.ed;return o};
+const nv=v=>v==null||(Array.isArray(v)&&!v.length)?"":v;
+function changed(ds){const d=dayDoc(ds)[ds.slice(8)],s=new Set();if(!d||d.base==null||!isUnsaved(ds))return s;let b={};try{b=JSON.parse(d.base)}catch(e){}
+  for(const f of new Set([...Object.keys(b),...Object.keys(strip(d))]))if(JSON.stringify(nv(b[f]))!==JSON.stringify(nv(d[f])))s.add(f);return s}
+function snap(k,p){if(!k.startsWith("d-")||!cfg().notion)return;const ds=k.slice(2)+"-"+p.slice(0,2),d=day(ds);if(d.base==null&&!isUnsaved(ds))d.base=JSON.stringify(strip(d))}
+function ubar(){const ds=st.date;if(st.view!=="day"||!isUnsaved(ds))return"";const d=day(ds);
+  return`<div class="ubar" role="status"><span>저장하지 않은 변경 ${changed(ds).size||1}건</span>${d.base!=null?`<button data-act="revert" data-ds="${ds}">되돌리기</button>`:""}<button data-act="nsave" data-ds="${ds}">노션 저장</button></div>`}
+function updUbar(){const app=$("#app");app.querySelector(".ubar")?.remove();const h=ubar(),ph=app.querySelector(".page.l .ph");if(h&&ph){app.querySelectorAll(".pf [data-act=nsave]").forEach(e=>e.remove());ph.insertAdjacentHTML("afterend",h)}}
+const CAM=`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 7h3l2-2.5h6L17 7h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.6"/></svg>`;
+function vDay(){const ds=st.date,dt=parse(ds),dk="d-"+ds.slice(0,7),dd=ds.slice(8),d=day(ds),P0=photos(ds.slice(0,7))[dd],P=okPhoto(P0)?P0:"";ensureMonth(ds.slice(0,7));
+  const H=habits(),act=H.list.filter(h=>h.on!==false&&(!h.start||h.start<=ds)),ch=changed(ds),n=cfg().notion;
+  const SEC=["MORNING NOTE","JOY","RESET","TOMORROW","COMMENT","BODY","NOTES"];
+  const lb=(t,f,sub="",x="")=>`<div class="lbl${SEC.includes(t)?" sec":""}"><span>${t}${ch.has(f)?" •":""}${sub?` <span class="mute" style="letter-spacing:0;text-transform:none">${sub}</span>`:""}</span>${x}</div>`;
+  const L=head(`${dt.getMonth()+1}.${dt.getDate()}`,`${DOW[dt.getDay()]} ${dt.getFullYear()}`,!mqWide.matches)+ubar()+
+   (n&&MCP&&!NM()["d:"+ds]?`<p class="sm mute" style="margin:0 0 8px">이 날짜의 Diary 페이지가 없어요<button class="mk" data-act="mkd" data-ds="${ds}">이 날짜 페이지 만들기</button></p>`:"")+
+   `<div class="dpg"><div class="row" style="align-items:stretch"><div style="flex:1;min-width:160px"><div class="tm"><span>WAKE UP${ch.has("wake")?" •":""}</span><input type="time" value="${esc(d.wake||"")}" data-bind="${dk}|${dd}.wake"><span>IN BED${ch.has("bed")?" •":""}</span><input type="time" value="${esc(d.bed||"")}" data-bind="${dk}|${dd}.bed"></div>
+   ${lb("HABIT","")}${act.length?`<div class="chips">${act.map(h=>`<button class="chip ${H.log[h.id]&&H.log[h.id][ds]?"on":""}" data-act="hab" data-h="${esc(h.id)}" data-ds="${ds}" title="${esc(h.name)}">${esc(h.icon||"")} ${esc(h.name)}</button>`).join("")}</div>`:`<div class="sm mute">습관 탭에서 습관을 만들어요</div>`}</div>
+   ${cfg().photos?`<div class="photo" style="width:120px;${P?`background-image:url('${esc(P)}')`:""}" data-act="dphoto" data-ds="${ds}" role="button" aria-label="사진">${P?"":CAM}</div>`:""}</div>
+   ${lb("SLEEP JOURNAL","sleep")}${ta(dk,dd+".sleep","—",2)}
+   ${lb("MORNING NOTE","morning")}${ta(dk,dd+".morning","—",2)}
+   ${lb("JOY","joy")}${ta(dk,dd+".joy","—",2)}
+   ${lb("RESET","reset")}${ta(dk,dd+".reset","—",2)}
    <div class="add">→<input class="in" placeholder="내가 할 수 있는 작은 일 하나" value="${esc(d.resetAct||"")}" data-bind="${dk}|${dd}.resetAct" maxlength="200"></div>
-   <div class="lbl">TOMORROW <span class="mute" style="letter-spacing:0;text-transform:none">내일은 어떤 사람이 되고 싶나요</span></div>${ta(dk,dd+".tomorrow","",2)}
-   <div class="lbl">COMMENT</div>${ta(dk,dd+".comment","",3)}
-   <div class="foot"><span>${ds.replace(/-/g,".")}</span>${n?`<span id="nstat">${isUnsaved(ds)?"노션에 저장 안 됨":d.ns?"노션 저장 "+esc(String(d.ns).slice(5,16).replace("T"," ")):""}</span><button class="btn g" data-act="npull" data-k="${ds.slice(0,7)}">노션에서 가져오기</button><button class="btn" data-act="nsave" data-ds="${ds}">노션 저장</button>`:""}<span class="sstat"></span></div>`;
+   ${lb("TOMORROW","tomorrow")}${ta(dk,dd+".tomorrow","—",2)}
+   ${lb("COMMENT","comment")}${ta(dk,dd+".comment","—",2)}</div>`;
+  const evs=eventsOn(ds),nts=notesDoc(ds.slice(0,4)).list.filter(x=>x.date===ds);
+  const R=(mqWide.matches?head("&nbsp;","",true):"")+
+   `<div class="dpg"><div class="dcols"><div>${lb("EVENT","","",`<button class="lnk" data-act="cell" data-ds="${ds}">＋ 일정</button>`)}${evs.map(e=>`<div class="ev" style="font-size:12px">${e.time?`<b>${esc(e.time)}</b>`:""}${esc(e.title)}</div>`).join("")||`<div class="sm mute">일정 없음</div>`}
+     ${lb("TO DO","todos")}${checklist(dk,dd+".todos",d.todos||[],"할 일 추가")}</div>
+    <div>${lb("LOG","log")}${ta(dk,dd+".log","—",10)}</div></div>
+   ${lb("BODY","body","",`<button class="lnk" data-act="bodyedit">${st.bodyEdit?"완료":"편집"}</button>`)}${st.bodyEdit?ta(dk,dd+".body","길게 남기고 싶은 이야기 — 노션 페이지 본문으로 들어가요",6):`<div class="sm" style="white-space:pre-wrap;min-height:28px;border-bottom:1px solid var(--soft);padding:4px 0">${d.body?esc(d.body):`<span class="mute">비어 있어요</span>`}</div>`}
+   ${lb("NOTES","","",`<button class="lnk" data-act="newnote" data-ds="${ds}" aria-label="이 날짜에 노트 추가">＋</button>`)}${nts.map(x=>`<div class="nl" data-act="opennote" data-id="${esc(x.id)}"><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(x.title)}</span>${x.cat?`<span class="tag">${esc(x.cat)}</span>`:""}</div>`).join("")}</div>`;
   return[L,R]}
 
-/* NOTES */
-function vNotes(){const y=st.date.slice(0,4),list=notesDoc(y).list.slice().sort((a,b)=>b.date.localeCompare(a.date));const sel=st.note&&findNote(st.note);
-  const L=`<div class="ph"><h1>Notes</h1><div class="nav"><button class="btn g" data-act="newnote" style="letter-spacing:0">＋ 새 노트</button></div></div>
-   <div class="row" style="justify-content:center;gap:18px"><button class="lnk" data-act="ny" data-n="-1">◂</button><b style="font-size:22px">${y}</b><button class="lnk" data-act="ny" data-n="1">▸</button></div>
-   <div class="lbl" style="justify-content:center">CONTENTS · ${list.length}</div>
-   ${list.map(n=>`<div class="nl ${sel&&sel.id===n.id?"sel":""}" data-act="opennote" data-id="${esc(n.id)}"><span class="d">${esc(String(n.date).slice(5).replace("-","."))}</span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(n.title)}</span>${n.cat?`<span class="tag">${esc(n.cat)}</span>`:""}</div>`).join("")||`<div class="empty">이 해에 쓴 노트가 없어요</div>`}`;
-  let R;
-  if(!sel)R=`<div class="ph"><h1>&nbsp;</h1></div><div class="empty">왼쪽에서 노트를 고르거나 새 노트를 만드세요</div>`;
-  else{const k="n-"+sel.date.slice(0,4),i=notesDoc(sel.date.slice(0,4)).list.indexOf(sel);
-    R=`<div class="ph"><h1 style="flex:1"><input class="in" style="font-size:20px;font-weight:800;border:0" value="${esc(sel.title)}" data-bind="${k}|list.${i}.title"></h1></div>
-    <div class="row"><input class="in" type="date" value="${esc(sel.date)}" data-act-change="notedate" data-id="${esc(sel.id)}" style="flex:1"><select data-bind="${k}|list.${i}.cat" style="flex:1;border:0;border-bottom:1px solid var(--line);background:none;min-height:38px">${["",...cfg().noteCats].map(x=>`<option ${x===sel.cat?"selected":""} value="${esc(x)}">${x?esc(x):"분류 없음"}</option>`).join("")}</select></div>
-    <textarea style="min-height:50vh;margin-top:12px" data-bind="${k}|list.${i}.body" placeholder="길게 남기고 싶은 이야기">${esc(sel.body)}</textarea>
-    <div class="foot"><button class="btn g" data-act="delnote" data-id="${esc(sel.id)}">삭제</button><span class="sstat"></span>${cfg().notion?`<button class="btn" data-act="nnote" data-id="${esc(sel.id)}">노션 저장</button>`:""}</div>`}
+/* NOTES — left: the year's CONTENTS grouped by category; right: a month calendar of notes */
+function vNotes(){const y=st.date.slice(0,4),list=notesDoc(y).list.slice().sort((a,b)=>b.date.localeCompare(a.date)),t=todayStr();
+  if(!st.nmonth||st.nmonth.slice(0,4)!==y)st.nmonth=y===t.slice(0,4)?t.slice(0,7):y+"-01";
+  const cats=[...new Set([...cfg().noteCats,...list.map(n=>n.cat||"")])].sort((a,b)=>(a==="")-(b===""));
+  const groups=cats.map(c=>[c,list.filter(n=>(n.cat||"")===c)]).filter(([,l])=>l.length);
+  const row=n=>`<div class="nl" data-act="opennote" data-id="${esc(n.id)}"><span class="d">${esc(String(n.date).slice(5).replace("-","."))}</span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(n.title)}</span></div>`;
+  const L=`<div class="ph"><h1>Notes<small>${list.length}</small></h1><div class="nav"><button class="btn g" data-act="newnote" style="letter-spacing:0;border:1px solid var(--ink);border-radius:2px;padding:4px 10px;min-height:28px;color:var(--ink)">＋ 새 노트</button></div></div>
+   <div class="row" style="justify-content:center;gap:18px"><button class="lnk" data-act="ny" data-n="-1" aria-label="이전 해">◂</button><b style="font-size:22px">${y}</b><button class="lnk" data-act="ny" data-n="1" aria-label="다음 해">▸</button></div>
+   <div class="lbl" style="justify-content:center;letter-spacing:.3em">CONTENTS</div>
+   <div style="max-width:300px;margin:0 auto">${groups.map(([c,l],i)=>`<div class="ncat" data-act="nfold" data-c="${esc(c)}"><span class="mute">${pad(i+1)}</span><b>${esc(c||"태그 없음")}</b><i></i><span>${l.length}</span></div>${st.nfold[c]?"":l.map(row).join("")}`).join("")||`<div class="empty">이 해에 쓴 노트가 없어요</div>`}</div>`;
+  const d0=parse(st.nmonth+"-01"),mo=d0.getMonth(),last=new Date(d0.getFullYear(),mo,daysIn(d0.getFullYear(),mo)),byDay={};
+  list.forEach(n=>(byDay[n.date]||(byDay[n.date]=[])).push(n));
+  let g=`<div class="cal" style="grid-template-columns:repeat(7,minmax(0,1fr))">${["M","T","W","T","F","S","S"].map(x=>`<div class="hd">${x}</div>`).join("")}`;
+  for(let dt=addDays(d0,-((d0.getDay()+6)%7));dt<=last||dt.getDay()!==1;dt=addDays(dt,1)){const ds=ymd(dt);
+    g+=`<div class="c ${dt.getMonth()===mo?"":"o"} ${ds===t?"t":""}" data-act="newnote" data-ds="${ds}"><span class="n">${dt.getDate()}</span>${(byDay[ds]||[]).map(n=>`<div class="ev" data-act="opennote" data-id="${esc(n.id)}">${esc(n.title)}</div>`).join("")}</div>`}
+  const R=`<div class="ph"><h1><small style="margin:0">${d0.getFullYear()}</small></h1><div class="nav"><button data-act="nm" data-n="-1">◂ PREV</button><span>|</span><button data-act="nm" data-n="1">NEXT ▸</button></div></div>
+   <div class="row" style="justify-content:space-between;margin-bottom:8px"><b>${MON[mo]}</b><span class="sm mute">${list.filter(n=>n.date.startsWith(st.nmonth)).length}</span></div>${g}</div>`;
   return[L,R]}
 function findNote(id){for(const k of S.keys())if(k.startsWith("n-")){const n=S.cache[k].list.find(x=>x.id===id);if(n)return n}return null}
 
-/* HABIT */
+/* HABIT — list: stats · year heat · month table | habits by category. Detail: settings + 12 mini calendars + its stats */
+const HCATS=["자기계발","건강관리","생활","마음"];
+const EMO=["💧","📚","🏃","🧘","💪","🥗","🍎","🛌","☀️","🌙","📝","✍️","🎯","🧠","💊","🚶","🚴","🏊","🧹","🧺","🍳","☕","🚭","💰","📈","🎨","🎸","🎹","📷","🌱","🪴","🐶","🙏","❤️","😊","😌","🦷","📵","⏰","📖","🗣️","🤝","🎧","🧩","✅","⭐","🔥","🏋️","🥛","🍵"];
 function streak(h,log){let n=0;for(let d=new Date();;d=addDays(d,-1)){const ds=ymd(d);if(log[ds])n++;else if(ds!==todayStr())break;if(n>3660)break}return n}
-function vHabit(){const H=habits(),act=H.list.filter(h=>h.on!==false),t=todayStr(),y=new Date().getFullYear();
+function bestStreak(log){let best=0,run=0,prev=null;for(const x of Object.keys(log).filter(k=>log[k]).sort()){run=prev&&ymd(addDays(parse(prev),1))===x?run+1:1;best=Math.max(best,run);prev=x}return best}
+const hDone=(h,ds)=>{const l=habits().log[h.id];return !!(l&&l[ds])};
+function hRate(h,a,b){let n=0,c=0;const t=todayStr();for(let d=parse(a);ymd(d)<=b;d=addDays(d,1)){const ds=ymd(d);if(ds>t)break;if(h.start&&ds<h.start)continue;n++;if(hDone(h,ds))c++}return n?Math.round(c/n*100):null}
+const monthEnd=k=>`${k}-${pad(daysIn(+k.slice(0,4),+k.slice(5,7)-1))}`;
+function hEdit(fn){const h=habits().list.find(x=>x.id===st.habit);if(!h)return;fn(h);S.save("habits",0,"list");syncHabit(h);render()}
+function applyHF(el){const h=habits().list.find(x=>x.id===st.habit);if(!h)return;const f=el.dataset.hf,v=el.value.trim();if(!v||h[f]===v)return;h[f]=v;S.save("habits",0,"list");syncHabit(h);render()}
+function miniMonth(h,y,m){const k=`${y}-${pad(m+1)}`,nd=daysIn(y,m),t=todayStr(),r=hRate(h,k+"-01",monthEnd(k)),off=(new Date(y,m,1).getDay()+6)%7;
+  let g=`<div class="mm"><div class="mmh"><b>${MON[m].slice(0,3)}</b><span>${r==null?"—":r+"%"}</span></div><div class="mmg">${["M","T","W","T","F","S","S"].map(x=>`<span class="mute">${x}</span>`).join("")}${"<span></span>".repeat(off)}`;
+  for(let d=1;d<=nd;d++){const ds=`${k}-${pad(d)}`;g+=`<button class="${hDone(h,ds)?"on":""}${ds===t?" td":""}${ds>t||(h.start&&ds<h.start)?" fut":""}" data-act="hab" data-h="${esc(h.id)}" data-ds="${ds}" aria-label="${ds}">${d}</button>`}
+  return g+"</div></div>"}
+function vHabitOne(h){const H=habits(),y=st.hyear,i=H.list.indexOf(h),log=H.log[h.id]||{},t=todayStr(),cats=[...new Set([...HCATS,...H.list.map(x=>x.cat).filter(Boolean)])];
+  const L=`<div class="ph"><h1 style="display:flex;align-items:center;gap:6px;flex:1;min-width:0"><button class="lnk" data-act="hback" aria-label="목록으로" style="font-size:18px;padding:4px;letter-spacing:0">←</button><span>${esc(h.icon||"")}</span><input class="in" id="hN" data-hf="name" value="${esc(h.name)}" maxlength="60" aria-label="습관 이름" style="font-size:22px;font-weight:800;border:0;flex:1;min-width:0;padding:0"><small>${y}</small></h1></div>
+   <div class="row hrow"><span class="lbl">ON</span><button class="chip ${h.on===false?"":"on"}" data-act="hon">${h.on===false?"OFF":"ON"}</button>
+     <span class="lbl">START</span><input class="in" type="date" id="hS" data-hf="start" value="${esc(h.start||t)}" style="width:auto">
+     <span class="lbl">ORDER</span><button class="lnk" data-act="hord" data-n="-1" aria-label="앞으로">◂</button><b>${i+1}</b><button class="lnk" data-act="hord" data-n="1" aria-label="뒤로">▸</button>
+     <span style="flex:1"></span><button class="lnk" data-act="hdel">삭제</button></div>
+   <div class="row hrow"><span class="lbl">CATEGORY</span>${cats.map(c=>`<button class="chip ${h.cat===c?"on":""}" data-act="hcat" data-v="${esc(c)}">${esc(c)}</button>`).join("")}<input class="in" id="hC" data-hf="cat" placeholder="+ 직접 입력" maxlength="30" style="width:96px">
+     <span style="flex:1"></span><span class="lbl">ICON</span><button class="btn g" data-act="hicon" id="hI" style="min-width:44px;font-size:16px;padding:4px 10px">${esc(h.icon||"＋")}</button></div>
+   ${st.hicon?`<div style="position:relative;height:0"><div class="emo pop">${EMO.map(x=>`<button data-act="hseticon" data-v="${x}">${x}</button>`).join("")}</div></div>`:""}
+   <div class="mms">${[0,1,2,3,4,5].map(m=>miniMonth(h,y,m)).join("")}</div>`;
+  const yr=hRate(h,`${y}-01-01`,`${y}-12-31`),mo=hRate(h,t.slice(0,7)+"-01",monthEnd(t.slice(0,7)));
+  const R=`<div class="ph"><h1 class="mute" style="font-weight:400;font-size:16px">${esc(h.name)}</h1><div class="nav"><button data-act="hy" data-n="-1">◂ PREV</button><span>|</span><button data-act="hy" data-n="1">NEXT ▸</button></div></div>
+   <div class="stats hst"><div><b>${yr??0}%</b><span>${y} 달성률</span></div><div><b>${mo??0}%</b><span>이번 달</span></div><div><b>${streak(h,log)}일</b><span>연속</span></div><div><b>${bestStreak(log)}일</b><span>최장 연속</span></div></div>
+   <div class="mms">${[6,7,8,9,10,11].map(m=>miniMonth(h,y,m)).join("")}</div>`;
+  return[L,R]}
+function vHabit(){const H=habits();if(st.habit){const h=H.list.find(x=>x.id===st.habit);if(h)return vHabitOne(h);st.habit=null}
+  const act=H.list.filter(h=>h.on!==false),t=todayStr(),y=new Date().getFullYear();
   const hm=parse(st.hmonth+"-01"),hy=hm.getFullYear(),hmo=hm.getMonth(),nd=daysIn(hy,hmo);
   const elapsed=st.hmonth<t.slice(0,7)?nd:st.hmonth>t.slice(0,7)?0:new Date().getDate();
   let tot=0,dn=0;act.forEach(h=>{for(let d=1;d<=elapsed;d++){const ds=`${st.hmonth}-${pad(d)}`;if(h.start&&h.start>ds)continue;tot++;if(H.log[h.id]&&H.log[h.id][ds])dn++}});
-  const best=act.map(h=>({h,s:streak(h,H.log[h.id]||{})})).sort((a,b)=>b.s-a.s)[0];
+  const best=act.map(h=>({h,s:streak(h,H.log[h.id]||{}),r:hRate(h,st.hmonth+"-01",monthEnd(st.hmonth))||0})).sort((a,b)=>b.r-a.r||b.s-a.s)[0];
   const todayDone=act.filter(h=>H.log[h.id]&&H.log[h.id][t]).length;
-  let heat=`<div class="heat"><span></span>${Array.from({length:31},(_,i)=>`<span style="text-align:center">${(i+1)%5===0?i+1:""}</span>`).join("")}`;
-  for(let m=0;m<12;m++){heat+=`<span>${MON[m].slice(0,3)}</span>`;for(let d=1;d<=31;d++){if(d>daysIn(y,m)){heat+="<span></span>";continue}const ds=`${y}-${pad(m+1)}-${pad(d)}`;const a=H.list.filter(h=>!h.start||h.start<=ds);const c=a.filter(h=>H.log[h.id]&&H.log[h.id][ds]).length;const r=a.length?c/a.length:0;heat+=`<i title="${ds} ${c}/${a.length}" style="${r?`background:rgba(31,31,31,${.15+.85*r})`:""}"></i>`}}
-  heat+="</div>";
-  const L=`<div class="ph"><h1>Habit<small>${y}</small></h1></div>
-   <div class="stats"><div><b>${act.length}개</b><span>진행 중인 습관</span></div><div><b>${todayDone}/${act.length}</b><span>오늘 완료</span></div><div><b>${tot?Math.round(dn/tot*100):0}%</b><span>이 달 전체</span></div><div><b>${best&&best.s?best.s+"일":"–"}</b><span>${best&&best.s?esc(best.h.name)+" 연속":"최장 연속"}</span></div></div>
-   <div class="lbl">${y} 하루 달성 비율</div>${heat}
-   <div class="lbl">습관 목록</div>${H.list.map(h=>`<div class="hl ${h.on===false?"offh":""}" data-act="habedit" data-h="${esc(h.id)}"><span style="width:22px">${esc(h.icon||"•")}</span><span style="flex:1">${esc(h.name)}</span>${h.cat?`<span class="tag">${esc(h.cat)}</span>`:""}<span class="sm mute">${h.on===false?"꺼짐":streak(h,H.log[h.id]||{})+"일"}</span></div>`).join("")}
-   <div class="add">＋<input class="in" placeholder="새 습관 이름 입력 후 Enter" data-addhabit maxlength="60"></div>`;
+  const off=(new Date(y,0,1).getDay()-cfg().weekStart+7)%7;let heat=`<div class="heat">${"<span></span>".repeat(off)}`;
+  for(let m=0;m<12;m++)for(let d=1;d<=daysIn(y,m);d++){const ds=`${y}-${pad(m+1)}-${pad(d)}`;const a=H.list.filter(h=>!h.start||h.start<=ds);const c=a.filter(h=>H.log[h.id]&&H.log[h.id][ds]).length;const r=a.length?c/a.length:0;heat+=`<i class="${ds===t?"td":""}" title="${ds} ${c}/${a.length}" style="${r?`background:rgba(31,31,31,${.15+.85*r})`:""}"></i>`}
+  heat+=`</div><div class="heatm">${MON.map(x=>`<span>${x.slice(0,3)}</span>`).join("")}</div>`;
   let g=`<table class="hg"><thead><tr><th class="nm"></th>${Array.from({length:nd},(_,i)=>`<th>${i+1}<br><span class="mute">${DOW[new Date(hy,hmo,i+1).getDay()][0]}</span></th>`).join("")}<th style="width:30px">%</th></tr></thead><tbody>`;
   act.forEach(h=>{let c=0,n=0;g+=`<tr><td class="nm" data-act="habedit" data-h="${esc(h.id)}">${esc(h.icon||"")} ${esc(h.name)}</td>`;
     for(let d=1;d<=nd;d++){const ds=`${st.hmonth}-${pad(d)}`,on=!!(H.log[h.id]&&H.log[h.id][ds]),fut=ds>t,pre=h.start&&h.start>ds;if(!fut&&!pre){n++;if(on)c++}
       g+=`<td class="c ${on?"on":"off"} ${fut||pre?"fut":""}" data-act="hab" data-h="${esc(h.id)}" data-ds="${ds}" title="${ds}"></td>`}
     g+=`<td>${n?Math.round(c/n*100):0}</td></tr>`});
   g+="</tbody></table>"+(act.length?"":`<div class="empty">진행 중인 습관이 없어요</div>`);
-  const R=`<div class="ph"><h1 style="font-size:14px;letter-spacing:.16em">${MON[hmo].toUpperCase()} <small>${hy}</small></h1><div class="nav"><button data-act="hm" data-n="-1">◂ PREV</button><span>|</span><button data-act="hm" data-n="1">NEXT ▸</button></div></div><div style="overflow-x:auto">${g}</div>`;
+  const L=`<div class="ph"><h1>Habit<small>${y}</small></h1></div>
+   <div class="stats"><div><b>${act.length}개</b><span>진행 중인 습관</span></div><div><b>${todayDone}/${act.length}</b><span>오늘 완료</span></div><div><b>${tot?Math.round(dn/tot*100):0}%</b><span>이 달 전체</span></div><div><b>${best&&(best.r||best.s)?esc(best.h.name):"–"}</b><span>이 달 최고의 습관${best&&best.s?` · ${best.s}일 연속`:""}</span></div></div>
+   <div class="lbl"><span>${y}</span><span>하루 달성 비율</span></div>${heat}
+   <div class="lbl" style="margin-top:18px"><span><button class="lnk" data-act="hm" data-n="-1" aria-label="이전 달">◂</button><b class="hmn" style="color:var(--ink);letter-spacing:.16em">${MON[hmo].toUpperCase()}</b> <span>${hy}</span><button class="lnk" data-act="hm" data-n="1" aria-label="다음 달">▸</button></span><span>월간 습관</span></div><div style="overflow-x:auto">${g}</div>`;
+  const show=H.list.filter(h=>h.on!==false||cfg().showOff),mk=t.slice(0,7);
+  const groups=[...new Set([...HCATS,...show.map(h=>h.cat||"")])].sort((a,b)=>(a==="")-(b==="")).map(c=>[c,show.filter(h=>(h.cat||"")===c)]).filter(([,l])=>l.length);
+  const card=h=>`<div class="hl ${h.on===false?"offh":""}" data-act="habedit" data-h="${esc(h.id)}"><span class="hi">${esc(h.icon||"•")}</span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><b>${esc(h.name)}</b><br><span class="sm mute">since ${esc(String(h.start||"").replace(/-/g,"."))}</span></span><span class="sm">${hRate(h,mk+"-01",monthEnd(mk))??0}%</span><span class="tag">${h.on===false?"OFF":"ON"}</span></div>`;
+  const R=head(`<small style="margin:0">${show.length}</small>`,"",true)+`<div class="add" style="border-bottom:1px solid var(--soft);margin-bottom:6px">＋<input class="in" placeholder="새 습관" data-addhabit maxlength="60" aria-label="새 습관 이름 입력 후 Enter" style="border:0"></div>${groups.map(([c,l])=>`<div class="hgrp"><div class="lbl">${esc(c||"분류 없음")}</div>${l.map(card).join("")}</div>`).join("")}`;
   return[L,R]}
 
 /* SETTING */
@@ -619,21 +689,25 @@ function vSetting(){const c=cfg(),n=c.notion,mode=S.mode==="db"?"클로드 계�
   const L=`<div class="ph"><h1>Setting</h1></div><div class="set">
   <section><h3>저장 위치</h3><p class="sm">${mode}</p><div class="row"><button class="btn g" data-act="export">백업 파일 받기</button><button class="btn g" data-act="import">백업 불러오기</button></div></section>
   <section><h3>한 주의 시작</h3><div class="seg"><button class="${c.weekStart===1?"on":""}" data-act="ws" data-v="1">월요일</button><button class="${c.weekStart===0?"on":""}" data-act="ws" data-v="0">일요일</button></div></section>
+  <section><h3>습관 보기</h3><div class="seg"><button class="${!c.showOff?"on":""}" data-act="showoff" data-v="0">ON만</button><button class="${c.showOff?"on":""}" data-act="showoff" data-v="1">전체</button></div><p class="sm mute">꺼 둔 습관도 습관 목록에 보일지 정해요.</p></section>
   <section><h3>사진 기능</h3><div class="seg"><button class="${c.photos?"on":""}" data-act="photos" data-v="1">켜기</button><button class="${!c.photos?"on":""}" data-act="photos" data-v="0">끄기</button></div>
    <p class="sm mute">${S.mode==="db"?"사진은 이 아티팩트 저장 공간에 올라가요(노션에는 안 들어가요). 아티팩트마다 용량 한도가 있어요.":"사진은 이 기기에만 작게 줄여 저장돼요(브라우저 한도 약 5MB)."}</p></section>
   <section><h3>노트 분류</h3><div class="chips">${c.noteCats.map((x,i)=>`<span class="chip">${esc(x)} <button class="x" style="border:0;background:none;padding:0 0 0 4px" data-act="rmcat" data-i="${i}" aria-label="삭제">×</button></span>`).join("")}</div>
    <div class="add">＋<input class="in" placeholder="분류 추가 후 Enter" data-addcat maxlength="20"></div></section></div>`;
-  const conn=!!MCP;
-  const R=`<div class="ph"><h1>&nbsp;</h1></div><div class="set">
-  <section><h3>구글 캘린더</h3>${conn?`<div class="seg"><button class="${c.gcal?"on":""}" data-act="gcal" data-v="1">연동</button><button class="${!c.gcal?"on":""}" data-act="gcal" data-v="0">끄기</button></div>
+  const conn=!!MCP,tb=st.stab,cnt=p=>Object.keys(NM()).filter(k=>k.startsWith(p)).length;
+  const G=`<section><h3>구글 캘린더</h3>${conn?`<div class="seg"><button class="${c.gcal?"on":""}" data-act="gcal" data-v="1">연동</button><button class="${!c.gcal?"on":""}" data-act="gcal" data-v="0">끄기</button></div>
    ${c.gcal?`<div class="row" style="margin-top:8px"><select id="calSel" style="flex:1;border:0;border-bottom:1px solid var(--line);background:none;min-height:38px"><option value="">기본 캘린더</option>${(gcCals||[]).map(x=>`<option ${x.id===c.calId?"selected":""} value="${esc(x.id)}">${esc(x.summary||x.id)}</option>`).join("")}</select><button class="btn g" data-act="loadcals">목록</button></div>`:""}
    <p class="sm mute">날짜를 눌러 넣은 일정이 구글 캘린더에 바로 들어가고, 구글 캘린더에서 고친 일정은 1분 안에 여기에 보여요.${gc.err?` <b>${esc(mcpMsg(gc.err,GCAL))}</b>`:""}</p>`
-   :`<p class="sm mute">이 화면은 기기 안에서만 동작해요. 구글 캘린더·노션 동기화는 클로드 아티팩트로 열면 켜져요(설명서 참고). 지금은 일정이 이 기기에 저장돼요.</p>`}</section>
-  <section><h3>노션</h3>${conn?(n?`<p class="sm">연결됨 · 데이터베이스 5개 (Diary · Planner · Notes · Habits · Habit Log)</p><p><a href="https://www.notion.so/${esc(n.page)}" target="_blank" rel="noopener">노션에서 열기 ↗</a></p>
-   <div class="row"><span class="sm">올해부터</span><select id="untilY" style="border:0;border-bottom:1px solid var(--line);background:none;min-height:38px">${[0,1,2].map(i=>{const v=new Date().getFullYear()+i;return`<option ${v===2027?"selected":""}>${v}</option>`}).join("")}</select><span class="sm">년 말까지</span><button class="btn" data-act="nall">전부 만들기</button></div>
-   <p class="sm mute">날짜별 다이어리·월간·주간 페이지를 노션에 한 번에 만들어 둡니다. 데일리는 [노션 저장]을 누를 때, 목표·습관은 바꿀 때 자동으로 노션에 들어가요.</p>`
+   :`<p class="sm mute">이 화면은 기기 안에서만 동작해요. 구글 캘린더·노션 동기화는 클로드 아티팩트로 열면 켜져요(설명서 참고). 지금은 일정이 이 기기에 저장돼요.</p>`}</section>`;
+  const N=`<section><h3>노션</h3>${conn?(n?`<p class="sm">연결됨 · 데이터베이스 5개 (Diary · Planner · Notes · Habits · Habit Log)</p><p><a href="https://www.notion.so/${esc(n.page)}" target="_blank" rel="noopener">노션에서 열기 ↗</a></p>
+   <div class="lbl">PAGES</div><p class="sm" style="margin:0">Diary ${cnt("d:")} · Habit ${cnt("hl:")} · Weekly ${cnt("w:")} · Monthly ${cnt("m:")}</p>
+   <div class="row" style="justify-content:space-between;align-items:center;flex-wrap:nowrap"><p class="sm mute" style="flex:1">올해 1월부터 <select id="untilY" style="border:0;border-bottom:1px solid var(--line);background:none;min-height:34px">${[0,1,2].map(i=>{const v=new Date().getFullYear()+i;return`<option ${v===2027?"selected":""}>${v}</option>`}).join("")}</select>년 말까지 Diary · Habit · Weekly · Monthly 페이지를 만들어요. 이미 있는 건 건너뛰어요.</p>
+   <button class="btn g" data-act="nall" style="flex:0 0 auto">전부 만들기</button></div>
+   <p class="sm mute">데일리는 [노션 저장]을 누를 때, 목표·습관·노트는 바꿀 때 자동으로 노션에 들어가요.</p>`
    :`<p class="sm">노션에 Diary · Planner · Notes · Habits · Habit Log 데이터베이스를 만들어 연결합니다. 노션 무료 계정이면 충분해요.</p><button class="btn" data-act="nsetup">노션 연결하기</button>`)
-   :`<p class="sm mute">클로드 아티팩트로 열면 쓸 수 있어요.</p>`}</section>
+   :`<p class="sm mute">클로드 아티팩트로 열면 쓸 수 있어요.</p>`}</section>`;
+  const R=`<div class="ph"><h1>&nbsp;</h1></div><div class="set"><div class="seg" style="margin-bottom:12px"><button class="${tb==="gcal"?"on":""}" data-act="stab" data-v="gcal">구글 캘린더</button><button class="${tb==="notion"?"on":""}" data-act="stab" data-v="notion">노션</button></div>
+  ${tb==="gcal"?G:N}
   <section><h3>고치고 싶은 곳이 있다면</h3><p class="sm mute">클로드에서 이 아티팩트를 열고 채팅에 “월간 페이지를 일요일부터 보이게 바꿔줘”처럼 말하면 그대로 고쳐져요. 이 스타일로 가계부·업무일지·스크랩북도 만들 수 있어요.</p></section>
   <p class="sm mute">트윈 다이어리 · 소스 공개(비상업) · <a href="https://github.com/heedonggu/twin-diary" target="_blank" rel="noopener">GitHub</a></p></div>`;
   return[L,R]}
@@ -645,14 +719,18 @@ let pendingRender=false;
 const typing=()=>{const a=document.activeElement;return a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)&&a.closest(".book")};
 function render(){if(st.date)pullNotionMonth(st.date.slice(0,7));
   const v={year:vYear,month:vMonth,week:vWeek,day:vDay,notes:vNotes,habit:vHabit,setting:vSetting}[st.view]||vMonth;
-  const[l,r]=v();const app=$("#app");
+  const[l,r]=v(),[fl,fr]=pfoot();const app=$("#app");
   const sl=app.querySelector(".page.l")?.scrollTop||0,sr=app.querySelector(".page.r")?.scrollTop||0;
-  app.innerHTML=`<main class="book"><section class="page l${l.startsWith("<!--fill-->")?" fill":""}">${l}</section><section class="page r${r.startsWith("<!--fill-->")?" fill":""}">${r}</section></main>
+  app.innerHTML=`<main class="book"><section class="page l${l.startsWith("<!--fill-->")?" fill":""}">${l}${fl}</section><section class="page r${r.startsWith("<!--fill-->")?" fill":""}">${r}${fr}</section></main>
   <nav class="tabs" aria-label="페이지">${VIEWS.map(x=>`${x==="setting"?'<span class="sp"></span>':""}<button class="${st.view===x?"on":""}" data-view="${x}">${x.toUpperCase()}</button>`).join("")}<button data-act="today" title="오늘로">TODAY</button></nav>`;
   app.querySelector(".page.l").scrollTop=sl;app.querySelector(".page.r").scrollTop=sr;
   saveStatus();if(location.hash.slice(1)!==st.view)history.replaceState(null,"","#"+st.view);
   try{localStorage.setItem("twd-ui",JSON.stringify({view:st.view,photo:st.photo}))}catch(e){}
 }
+/* page foot like the paper diary: date (or year) with save state and Notion refresh on the left, the year on the right */
+function pfoot(){if(st.view==="setting")return["",""];const y=st.date.slice(0,4),isDay=st.view==="day",n=cfg().notion&&MCP;
+  return[`<div class="foot pf"><span>${isDay?st.date.replace(/-/g,"."):y}</span><span class="row" style="gap:6px"><span class="sstat"></span>${n?`<button class="lnk" data-act="npull" data-k="${st.date.slice(0,7)}" title="노션에서 가져오기" aria-label="노션에서 가져오기">↻</button>${isDay&&!isUnsaved(st.date)?`<button class="lnk" data-act="nsave" data-ds="${st.date}">노션 저장</button>`:""}`:""}</span></div>`,
+   `<div class="foot pf"><span></span><span>${y}</span></div>`]}
 function go2(view,date){st.view=view;if(date)st.date=date;render();for(const el of document.querySelectorAll(".page,.book"))el.scrollTop=0}
 
 /* ================= events ================= */
@@ -660,20 +738,22 @@ function afterEdit(k,p){
   if(k.startsWith("d-"))markUnsaved(k.slice(2)+"-"+p.slice(0,2));
   if(k.startsWith("m-"))syncMonth(k.slice(2));if(k.startsWith("w-"))syncWeek(k.slice(2));
   if(k.startsWith("n-")){const i=+p.split(".")[1],n=S.get(k).list[i];n&&syncNote(n)}}
-document.addEventListener("input",e=>{const el=e.target,b=el.dataset.bind;if(!b)return;const[k,p]=b.split("|");setPath(S.get(k),p,el.value);S.save(k,500,p.split(".")[0]);afterEdit(k,p)});
+document.addEventListener("input",e=>{const el=e.target;if(el.dataset.hf&&el.type==="date"){applyHF(el);return}const b=el.dataset.bind;if(!b)return;const[k,p]=b.split("|");snap(k,p);setPath(S.get(k),p,el.value);S.save(k,500,p.split(".")[0]);afterEdit(k,p)});
 document.addEventListener("change",e=>{const el=e.target;
-  if(el.dataset.check){const[k,p]=el.dataset.check.split("|");setPath(S.get(k),p,el.checked);S.save(k,0,p.split(".")[0]);afterEdit(k,p);render();return}
+  if(el.dataset.hf){applyHF(el);return}
+  if(el.dataset.check){const[k,p]=el.dataset.check.split("|");snap(k,p);setPath(S.get(k),p,el.checked);S.save(k,0,p.split(".")[0]);afterEdit(k,p);render();return}
   if(el.id==="calSel"){cfg().calId=el.value;S.save("settings",0);resetGcal();render();return}
   if(el.dataset.actChange==="notedate"){const n=findNote(el.dataset.id);if(!n||!el.value)return;const oy=n.date.slice(0,4),ny=el.value.slice(0,4);n.date=el.value;
-    if(oy!==ny){const o=notesDoc(oy);o.list=o.list.filter(x=>x.id!==n.id);notesDoc(ny).list.push(n);S.save("n-"+oy,0,"list");st.date=el.value}S.save("n-"+ny,0,"list");syncNote(n);render()}});
+    if(oy!==ny){const o=notesDoc(oy);o.list=o.list.filter(x=>x.id!==n.id);notesDoc(ny).list.push(n);S.save("n-"+oy,0,"list");st.date=el.value}S.save("n-"+ny,0,"list");syncNote(n);const dl=el.closest(".dim");render();if(dl){dl.remove();noteEdit(n.id)}}});
 document.addEventListener("focusout",()=>{if(pendingRender)setTimeout(()=>{if(!typing()&&pendingRender){pendingRender=false;render()}},50)});
 document.addEventListener("keydown",e=>{const el=e.target;if(e.key!=="Enter"||e.isComposing)return;
-  if(el.dataset.add){const v=el.value.trim();if(!v)return;e.preventDefault();const[k,p]=el.dataset.add.split("|");const doc=S.get(k);const arr=getPath(doc,p)||[];arr.push({t:v,done:false});setPath(doc,p,arr);S.save(k,0,p.split(".")[0]);afterEdit(k,p);
+  if(el.dataset.hf){e.preventDefault();applyHF(el);return}
+  if(el.dataset.add){const v=el.value.trim();if(!v)return;e.preventDefault();const[k,p]=el.dataset.add.split("|");snap(k,p);const doc=S.get(k);const arr=getPath(doc,p)||[];arr.push({t:v,done:false});setPath(doc,p,arr);S.save(k,0,p.split(".")[0]);afterEdit(k,p);
     render();const ni=document.querySelector(`[data-add="${CSS.escape(el.dataset.add)}"]`);ni&&ni.focus();return}
   if(el.hasAttribute("data-addhabit")){const v=el.value.trim();if(!v)return;const h={id:uid(),name:v,icon:"",cat:"",start:todayStr(),on:true};habits().list.push(h);S.save("habits",0,"list");syncHabit(h);render();document.querySelector("[data-addhabit]")?.focus();toast("습관을 만들었어요");return}
   if(el.hasAttribute("data-addcat")){const v=el.value.trim();if(!v)return;if(!cfg().noteCats.includes(v))cfg().noteCats.push(v);S.save("settings",0);render();document.querySelector("[data-addcat]")?.focus()}});
 document.addEventListener("click",async e=>{
-  const tv=e.target.closest("[data-view]");if(tv){go2(tv.dataset.view);return}
+  const tv=e.target.closest("[data-view]");if(tv){st.habit=null;go2(tv.dataset.view);return}
   const gd=e.target.closest("[data-go-day]");if(gd&&!gd.closest(".dlg")){e.stopPropagation();go2("day",gd.dataset.goDay);return}
   const a=e.target.closest("[data-act]");if(!a)return;const A=a.dataset.act,c=cfg();
   switch(A){
@@ -685,18 +765,35 @@ document.addEventListener("click",async e=>{
   case"photo":st.photo=!st.photo;render();break;
   case"dphoto":{const ds=a.dataset.ds,P=photos(ds.slice(0,7));if(okPhoto(P[ds.slice(8)])){const d=dialog(`<h2>사진 <button class="lnk" data-close>닫기</button></h2><img src="${esc(P[ds.slice(8)])}" style="width:100%;border-radius:4px"><div class="row" style="justify-content:space-between;margin-top:12px"><button class="btn g" id="pDel">사진 빼기</button><button class="btn" id="pNew">다른 사진</button></div>`);
       d.querySelector("#pDel").onclick=()=>{P[ds.slice(8)]="";S.save("p-"+ds.slice(0,7),0,ds.slice(8));d.remove();render()};d.querySelector("#pNew").onclick=()=>{d.remove();pickPhoto(ds)}}else pickPhoto(ds);break}
-  case"rmitem":{const doc=S.get(a.dataset.k),arr=getPath(doc,a.dataset.p);arr.splice(+a.dataset.i,1);S.save(a.dataset.k,0,a.dataset.p.split(".")[0]);afterEdit(a.dataset.k,a.dataset.p);render();break}
+  case"rmitem":{snap(a.dataset.k,a.dataset.p);const doc=S.get(a.dataset.k),arr=getPath(doc,a.dataset.p);arr.splice(+a.dataset.i,1);S.save(a.dataset.k,0,a.dataset.p.split(".")[0]);afterEdit(a.dataset.k,a.dataset.p);render();break}
   case"hab":{const H=habits(),id=a.dataset.h,ds=a.dataset.ds,hb=H.list.find(x=>x.id===id);if(!hb)break;if(ds>todayStr()){toast("오늘 이후는 체크할 수 없어요");break}if(hb.start&&ds<hb.start){toast("습관 시작일 전이에요");break}
     const l=H.log[id]||(H.log[id]={});l[ds]=l[ds]?0:1;S.save("habits",0,"log");syncHabitDay(ds);markUnsaved(ds);render();break}
-  case"habedit":habitDialog(a.dataset.h);break;
+  case"habedit":st.habit=a.dataset.h;st.hicon=false;st.hyear=new Date().getFullYear();render();for(const el of document.querySelectorAll(".page,.book"))el.scrollTop=0;break;
+  case"hback":st.habit=null;render();break;
+  case"hy":st.hyear+= +a.dataset.n;render();break;
+  case"hon":hEdit(h=>{h.on=h.on===false});break;
+  case"hcat":hEdit(h=>{h.cat=h.cat===a.dataset.v?"":a.dataset.v});break;
+  case"hicon":st.hicon=!st.hicon;render();break;
+  case"hseticon":st.hicon=false;hEdit(h=>{h.icon=a.dataset.v});break;
+  case"hord":{const H=habits(),i=H.list.findIndex(x=>x.id===st.habit),j=i+ +a.dataset.n;if(i<0||j<0||j>=H.list.length)break;[H.list[i],H.list[j]]=[H.list[j],H.list[i]];S.save("habits",0,"list");render();break}
+  case"hdel":if(!a.dataset.sure){a.dataset.sure=1;a.textContent="한 번 더 누르면 삭제";break}{const H=habits(),id=st.habit;H.list=H.list.filter(x=>x.id!==id);delete H.log[id];st.habit=null;S.save("habits",0);toast("습관을 지웠어요");render()}break;
+  case"showoff":c.showOff=a.dataset.v==="1";S.save("settings",0);render();break;
+  case"stab":st.stab=a.dataset.v;render();break;
+  case"mkm":{a.disabled=true;try{await nUpsert("m:"+a.dataset.k,"planner",plannerProps("Month",a.dataset.k));toast("월간 페이지를 만들었어요")}catch(e){toast(e.code?mcpMsg(e,NOTION):(e.message||String(e)))}render();break}
+  case"mkd":saveDayNotion(a.dataset.ds,a);break;
+  case"revert":{const ds=a.dataset.ds,d=day(ds);if(d.base==null)break;let b={};try{b=JSON.parse(d.base)}catch(e){}for(const f of Object.keys(d))if(f!=="ns")delete d[f];Object.assign(d,b);if(d.ns)d.ed=d.ns;
+    S.save("d-"+ds.slice(0,7),0,ds.slice(8));toast("저장한 상태로 되돌렸어요");render();break}
+  case"bodyedit":st.bodyEdit=!st.bodyEdit;render();break;
+  case"nm":st.nmonth=ym(addMonths(parse(st.nmonth+"-01"),+a.dataset.n));if(st.nmonth.slice(0,4)!==st.date.slice(0,4))st.date=st.nmonth+"-01";render();break;
+  case"nfold":st.nfold[a.dataset.c]=!st.nfold[a.dataset.c];render();break;
   case"hm":st.hmonth=ym(addMonths(parse(st.hmonth+"-01"),+a.dataset.n));render();break;
   case"nsave":saveDayNotion(a.dataset.ds,a);break;
   case"npull":a.disabled=true;await pullNotionMonth(a.dataset.k,true);render();break;
-  case"newnote":noteDialog();break;
-  case"opennote":st.note=a.dataset.id;render();if(!mqWide.matches)document.querySelector(".page.r")?.scrollIntoView({behavior:"smooth"});break;
-  case"ny":st.date=`${+st.date.slice(0,4)+ +a.dataset.n}-01-01`;st.note=null;render();break;
+  case"newnote":noteDialog(a.dataset.ds);break;
+  case"opennote":noteEdit(a.dataset.id);break;
+  case"ny":st.date=`${+st.date.slice(0,4)+ +a.dataset.n}-01-01`;st.nmonth=null;render();break;
   case"nnote":{const n=findNote(a.dataset.id);n&&saveNoteNotion(n,a);break}
-  case"delnote":if(a.dataset.sure){const n=findNote(a.dataset.id);const y=n.date.slice(0,4),D=notesDoc(y);D.list=D.list.filter(x=>x.id!==n.id);S.save("n-"+y,0,"list");st.note=null;render()}else{a.dataset.sure=1;a.textContent="한 번 더 누르면 삭제"}break;
+  case"delnote":if(a.dataset.sure){const n=findNote(a.dataset.id);const y=n.date.slice(0,4),D=notesDoc(y);D.list=D.list.filter(x=>x.id!==n.id);S.save("n-"+y,0,"list");a.closest(".dim")?.remove();toast("노트를 지웠어요");render()}else{a.dataset.sure=1;a.textContent="한 번 더 누르면 삭제"}break;
   case"ws":c.weekStart=+a.dataset.v;S.save("settings",0);render();break;
   case"photos":c.photos=a.dataset.v==="1";if(!c.photos)st.photo=false;S.save("settings",0);render();break;
   case"rmcat":c.noteCats.splice(+a.dataset.i,1);S.save("settings",0);render();break;

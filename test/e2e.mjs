@@ -96,7 +96,7 @@ await t("A05b 일정 고치기·지우기: 이름·시간 바꾸면 유지, × �
 });
 await t("A06 날짜 숫자 누르면 바로 그 날짜의 데일리", async () => {
   await page.click(`.c[data-ds="${T}"] .n`); ok(await page.locator(".tabs [data-view=day].on").count() === 1);
-  ok((await h1()).startsWith(`${T.slice(5, 7)}.${DD}`), await h1()); await tab("month");
+  ok((await h1()).startsWith(`${+T.slice(5, 7)}.${+DD}`), await h1()); await tab("month");
 });
 await t("A07 사진 다이어리: 날짜에 사진 → 새로고침 뒤에도 그 칸에 보임(이미지 열림) + 키워드 일기 유지", async () => {
   await page.click("[data-act=photo]"); ok(await page.locator(".memo .lbl", { hasText: "KEYWORD" }).count() === 1, "keyword col");
@@ -118,7 +118,7 @@ await t("A08 데일리 전 항목(기상·취침·수면·아침·할일·로그
   ok(await page.inputValue(`[data-bind="${k}|${DD}.wake"]`) === "07:00" && await page.inputValue(`[data-bind="${k}|${DD}.bed"]`) === "23:30", "times");
   for (const [x, v] of Object.entries(f)) ok(await page.inputValue(`[data-bind="${k}|${DD}.${x}"]`) === v, x);
   ok(await page.locator(`[data-bind="${k}|${DD}.todos.0.t"]`).inputValue() === "서류 제출", "todo");
-  ok((await page.textContent(".page.l")).includes("주간 회의"), "schedule on day");
+  ok((await page.textContent(".page.r")).includes("주간 회의"), "schedule on day");
   ok(await page.textContent(".foot .sstat") === "저장됨", "saved status");
 });
 await t("A09 주간: Week N·기간 표시, 목표·기간기록 저장 유지, 7일 일정, 할 일 체크가 데일리와 연동", async () => {
@@ -128,19 +128,21 @@ await t("A09 주간: Week N·기간 표시, 목표·기간기록 저장 유지, 
   ok(await page.locator(".wd").count() === 7, "7 days"); ok((await page.textContent(".page.r")).includes("주간 회의"), "event in week");
   await page.locator(".page.r .wd input[type=checkbox]").first().check(); await reload(); await tab("week");
   ok(await page.locator(".page.l .ck.done .in").first().inputValue() === "장보기", "weekly goal kept"); ok(await page.locator(".page.l textarea").first().inputValue() === "이번 주 흐름 시험", "period log kept");
-  await tab("day"); ok(await page.locator(".page.l .ck.done").count() >= 1, "todo checked from week shows on day");
+  await tab("day"); ok(await page.locator(".page.r .ck.done").count() >= 1, "todo checked from week shows on day");
 });
 await t("A10 습관: 이름+Enter 생성, 아이콘·분류·시작일 변경 유지, 끄기, 시작일 전 체크 막음", async () => {
   await tab("habit"); await page.fill("[data-addhabit]", "물 2L"); await page.press("[data-addhabit]", "Enter");
   await page.fill("[data-addhabit]", "독서"); await page.press("[data-addhabit]", "Enter");
   if (!firstOfMonth) { await page.locator(`.hg td.c[data-ds="${Y1}"]`).first().click(); ok(await page.locator(`.hg td.c.on[data-ds="${Y1}"]`).count() === 0, "before start blocked"); }
   const startDay = `${today.getFullYear()}-01-01`;
-  await page.locator(".hl", { hasText: "물 2L" }).click(); await page.fill("#hI", "💧"); await page.fill("#hC", "건강"); await page.fill("#hS", startDay); await page.click("#hSave");
-  await page.locator(".hl", { hasText: "독서" }).click(); await page.uncheck("#hO"); await page.click("#hSave");
+  await page.locator(".hl", { hasText: "물 2L" }).click(); ok(await page.locator(".mm").count() === 12, "12 mini calendars");
+  await page.click("#hI"); ok(await page.locator(".emo button").count() >= 40, "icon grid"); await page.click('[data-act=hseticon][data-v="💧"]');
+  await page.fill("#hC", "건강"); await page.press("#hC", "Enter"); await page.fill("#hS", startDay); await page.click("[data-act=hback]");
+  await page.locator(".hl", { hasText: "독서" }).click(); await page.click("[data-act=hon]"); ok((await page.textContent("[data-act=hon]")) === "OFF", "off"); await page.click("[data-act=hback]");
   await reload(); await tab("habit");
-  const row = page.locator(".hl", { hasText: "물 2L" }); const rt = await row.textContent(); ok(rt.includes("💧") && rt.includes("건강"), "icon/cat kept");
-  await row.click(); ok(await page.inputValue("#hS") === startDay, "start kept"); await page.click(".dlg [data-close]");
-  ok(await page.locator(".hl.offh").count() === 1, "off kept");
+  const row = page.locator(".hl", { hasText: "물 2L" }); ok((await row.textContent()).includes("💧"), "icon kept"); ok((await page.locator(".hgrp", { hasText: "물 2L" }).textContent()).includes("건강"), "category kept");
+  await row.click(); ok(await page.inputValue("#hS") === startDay, "start kept"); await page.click("[data-act=hback]");
+  ok(await page.locator(".hl", { hasText: "독서" }).count() === 0, "off hidden (ON only)");
   if (!firstOfMonth) { await page.locator(`.hg td.c[data-ds="${Y1}"]`).first().click(); ok(await page.locator(`.hg td.c.on[data-ds="${Y1}"]`).count() === 1, "after start allowed"); await page.locator(`.hg td.c[data-ds="${Y1}"]`).first().click(); }
 });
 await t("A11 습관 체크(표·데일리 양쪽) + 통계 4종 정확 + 1년 달성 그래프 칸 수 + 달 넘기기", async () => {
@@ -151,17 +153,21 @@ await t("A11 습관 체크(표·데일리 양쪽) + 통계 4종 정확 + 1년 �
   ok(/rgba/.test((await page.locator(`.heat i[title^="${T}"]`).getAttribute("style")) || ""), "today shaded");
   await tab("day"); ok(await page.locator(".chip.on", { hasText: "물 2L" }).count() === 1, "day chip on"); await page.click(".chip.on"); await tab("habit");
   ok(await page.locator(`.hg td.c.on[data-ds="${T}"]`).count() === 0, "unchecked from day"); await page.click(`.hg td.c[data-ds="${T}"]`);
-  await page.click("[data-act=hm][data-n='-1']"); ok(!(await h1("r")).includes(MONU[today.getMonth()]), "habit month prev"); await page.click("[data-act=hm][data-n='1']");
+  await page.click("[data-act=hm][data-n='-1']"); ok(!(await page.textContent(".hmn")).includes(MONU[today.getMonth()]), "habit month prev"); await page.click("[data-act=hm][data-n='1']");
+  await page.locator(".hl", { hasText: "물 2L" }).click(); ok(await page.locator(`.mmg button.on[data-ds="${T}"]`).count() === 1, "mini calendar shows check");
+  ok((await page.locator(".hst div").nth(2).textContent()).startsWith("1일"), "streak on detail"); await page.click(`.mmg button[data-ds="${T}"]`);
+  ok(await page.locator(`.mmg button.on[data-ds="${T}"]`).count() === 0, "mini calendar unchecks"); await page.click(`.mmg button[data-ds="${T}"]`); await page.click("[data-act=hback]");
 });
 await t("A12 노트: 새 노트(제목·날짜·분류) → 연도별 목차 → 본문·분류 유지 → 다른 해 노트는 그 해에만 → 삭제 유지", async () => {
   await tab("notes"); await page.click("[data-act=newnote]"); await page.fill("#nT", "책 리뷰"); await page.selectOption("#nC", "책"); await page.click("#nGo");
-  await page.fill(".page.r textarea", "좋은 하루는 저녁에 시작된다");
+  await page.fill(".dim textarea", "좋은 하루는 저녁에 시작된다"); await page.click(".dlg [data-close]");
   await page.click("[data-act=newnote]"); await page.fill("#nT", "작년 메모"); await page.fill("#nD", `${today.getFullYear() - 1}-06-01`); await page.click("#nGo");
   await reload(); await page.click("[data-act=today]"); await tab("notes");
-  const list = await page.locator(".nl").allTextContents(); ok(list.length === 1 && list[0].includes("책 리뷰") && list[0].includes("책"), list.join("|"));
-  await page.click(".nl"); ok(await page.inputValue(".page.r textarea") === "좋은 하루는 저녁에 시작된다", "body");
+  const list = await page.locator(".nl").allTextContents(); ok(list.length === 1 && list[0].includes("책 리뷰") && (await page.textContent(".ncat")).includes("책"), list.join("|"));
+  ok((await page.textContent(".page.r .cal")).includes("책 리뷰"), "note on calendar");
+  await page.click(".nl"); ok(await page.inputValue(".dim textarea") === "좋은 하루는 저녁에 시작된다", "body"); await page.click(".dlg [data-close]");
   await page.click("[data-act=ny][data-n='-1']"); ok((await page.locator(".nl").allTextContents()).join().includes("작년 메모"), "other year");
-  await page.click(".nl"); await page.click("[data-act=delnote]"); await page.click("[data-act=delnote]"); await reload(); await tab("notes"); await page.click("[data-act=ny][data-n='-1']");
+  await page.click(".nl"); await page.click("[data-act=delnote]"); await page.click("[data-act=delnote]"); ok(await page.locator(".dim").count() === 0, "sheet closed"); await reload(); await tab("notes"); await page.click("[data-act=ny][data-n='-1']");
   ok(await page.locator(".nl").count() === 0, "deleted after reload"); await page.click("[data-act=ny][data-n='1']");
 });
 await t("A13 설정: 노트 분류 추가·삭제가 새 노트 창에 반영, 새로고침 뒤 유지", async () => {
@@ -180,6 +186,11 @@ await t("A15 설정: 사진 기능 끄면 월간 카메라·데일리 사진칸 
   await page.click('[data-act=photos][data-v="0"]'); await reload(); await tab("month"); ok(await page.locator("[data-act=photo]").count() === 0, "month");
   await tab("day"); ok(await page.locator("[data-act=dphoto]").count() === 0, "day"); await tab("setting"); await page.click('[data-act=photos][data-v="1"]');
 });
+await t("A15b 설정: 습관 보기 ON만/전체 — 꺼 둔 습관을 목록에 보일지", async () => {
+  await tab("setting"); await page.click('[data-act=showoff][data-v="1"]'); await tab("habit"); ok(await page.locator(".hl.offh", { hasText: "독서" }).count() === 1, "all shows off habit");
+  await reload(); await tab("habit"); ok(await page.locator(".hl.offh").count() === 1, "kept"); await tab("setting"); await page.click('[data-act=showoff][data-v="0"]');
+  await tab("habit"); ok(await page.locator(".hl.offh").count() === 0, "ON only"); await tab("setting");
+});
 await t("A16 백업 파일 받기 → 다른 기기(새 브라우저)에서 불러오기 → 습관·일기·일정 그대로", async () => {
   const dl = page.waitForEvent("download"); await page.click("[data-act=export]"); const d = await dl; const backup = await d.path();
   const j = JSON.parse(fs.readFileSync(backup, "utf8")); ok(j.app === "twin-diary" && Object.keys(j.docs).length > 3, "backup content");
@@ -193,8 +204,8 @@ await t("A17 PREV/NEXT·TODAY: 연간·월간·주간·데일리 각각 날짜�
   await tab("year"); await page.click("[data-act=nav][data-n='1']"); ok((await h1()).startsWith(String(today.getFullYear() + 1)), "year next"); await page.click("[data-act=today]");
   await tab("month"); const h0 = await h1(); await page.click(".page.r [data-act=nav][data-n='1']"); ok(await h1() !== h0, "month next"); await page.click("[data-act=today]"); ok(await h1() === h0, "month today");
   await tab("week"); const w0 = await h1(); await page.click(".page.r [data-act=nav][data-n='1']"); ok(await h1() !== w0, "week next"); await page.click("[data-act=today]"); ok(await h1() === w0, "week today");
-  await tab("day"); await page.click(".page.r [data-act=nav][data-n='-1']"); ok((await h1()).startsWith(`${Y1.slice(5, 7)}.${Y1.slice(8)}`), "day prev " + await h1());
-  await page.click("[data-act=today]"); ok((await h1()).startsWith(`${T.slice(5, 7)}.${DD}`), "day today");
+  await tab("day"); await page.click(".page.r [data-act=nav][data-n='-1']"); ok((await h1()).startsWith(`${+Y1.slice(5, 7)}.${+Y1.slice(8)}`), "day prev " + await h1());
+  await page.click("[data-act=today]"); ok((await h1()).startsWith(`${+T.slice(5, 7)}.${+DD}`), "day today");
 });
 await t("A18 PWA: manifest·아이콘 + 서비스워커 등록 → 인터넷 끊고 다시 열어도 열리고 기록 보임", async () => {
   for (const f of ["manifest.webmanifest", "sw.js", "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png"]) { const r = await page.request.get(URL0 + f); ok(r.ok(), f); }
@@ -218,7 +229,7 @@ await t("A19 보안: 악성 백업(일정 시간·노트 id·습관 id에 HTML, 
   await p3.click(`.tabs [data-view="month"]`); await p3.click("[data-act=photo]"); await p3.waitForTimeout(100);
   const st3 = (await p3.getAttribute(`.c[data-ds="${T}"]`, "style")) || ""; ok(!st3.includes("javascript") && !st3.includes("x.test"), "bad photo url refused: " + st3);
   await p3.click("[data-act=photo]"); await p3.click(`.tabs [data-view="notes"]`);
-  await p3.click(".nl"); await p3.waitForTimeout(200);
+  await p3.click(".nl"); await p3.waitForTimeout(200); await p3.click(".dlg [data-close]");
   ok((await p3.textContent(".page.l")).includes("악성"), "data imported");
   ok(await p3.evaluate(() => window.__pwned) === undefined, "no script ran"); ok(await p3.evaluate(() => ({}).polluted) === undefined, "no prototype pollution");
   ok(await p3.evaluate(() => Object.keys(localStorage).some(k => k.includes("x<y") || k.includes("__proto__"))) === false, "unknown keys refused"); await c3.close();
@@ -386,17 +397,25 @@ await t("B05 노션 연결: 부모 페이지 + 데이터베이스 5개(Diary·Pl
   for (const f of ["Wake Up", "In Bed", "Sleep Journal", "Morning Note", "To do", "Log", "Joy", "Reset", "Tomorrow", "Comment"]) ok(dbs[0].i.schema.includes(`"${f}"`), "diary field " + f);
 });
 await t("B06 데일리 [노션 저장]: Diary에 전 속성 생성 → 다시 저장하면 같은 페이지 갱신, '저장 안 됨' 표시는 새로고침해도 유지", async () => {
-  await btab("day"); await b.click("[data-act=nsave]"); await b.waitForTimeout(250);
+  await btab("day"); ok(await b.locator("[data-act=mkd]").count() === 1, "no Diary page yet → make button"); await b.click("[data-act=nsave]"); await b.waitForTimeout(250);
+  ok(await b.locator("[data-act=mkd]").count() === 0, "make button gone once the page exists");
   const cr = lastProps(await calls(), x => x.how === "create" && x.p.Title === T); const D = await dsIds();
   ok(cr && cr.parent.data_source_id === D.diary, "diary ds");
   for (const [f, v] of Object.entries({ "date:Date:start": T, "Joy": "폰에서 씀", "Log": "이 기기 로그", "Comment": "재시도 시험" })) ok(cr.p[f] === v, f + "=" + cr.p[f]);
   for (const f of ["Wake Up", "In Bed", "Sleep Journal", "Morning Note", "To do", "Event", "Habits", "Reset", "Tomorrow"]) ok(f in cr.p, "prop " + f);
-  ok(!(await b.textContent("#nstat")).includes("안 됨"), "saved flag");
-  await b.fill(`[data-bind="${K}|${DD}.tomorrow"]`, "다정한 사람"); ok((await b.textContent("#nstat")).includes("저장 안 됨"), "unsaved flag");
-  await breload(); await btab("day"); ok((await b.textContent("#nstat")).includes("저장 안 됨"), "unsaved survives reload");
+  ok(await b.locator(".ubar").count() === 0, "saved: no unsaved bar");
+  await b.fill(`[data-bind="${K}|${DD}.tomorrow"]`, "다정한 사람"); ok((await b.textContent(".ubar")).includes("저장하지 않은 변경 1건"), "unsaved bar");
+  await breload(); await btab("day"); ok((await b.textContent(".ubar")).includes("저장하지 않은 변경 1건"), "unsaved survives reload");
+  ok(await b.locator(".page.l .lbl", { hasText: "TOMORROW •" }).count() === 1, "changed field marked");
   await b.click("[data-act=nsave]"); await b.waitForTimeout(250);
   const map = await b.evaluate(() => window.__store.nmap); const up = lastProps(await calls(), x => x.how === "update" && x.p.Title === T);
-  ok(up && up.id === map["d:" + T] && up.p.Tomorrow === "다정한 사람", "same page updated"); ok(!(await b.textContent("#nstat")).includes("안 됨"), "flag cleared");
+  ok(up && up.id === map["d:" + T] && up.p.Tomorrow === "다정한 사람", "same page updated"); ok(await b.locator(".ubar").count() === 0, "flag cleared");
+});
+await t("B06b 저장하지 않은 변경 [되돌리기]: 마지막으로 노션에 저장한 상태로 돌아감", async () => {
+  await b.fill(`[data-bind="${K}|${DD}.joy"]`, "임시 기쁨"); await b.fill(`[data-bind="${K}|${DD}.comment"]`, "임시 코멘트"); await b.locator("body").click({ position: { x: 2, y: 2 } }); await b.waitForTimeout(150);
+  ok((await b.textContent(".ubar")).includes("2건"), await b.textContent(".ubar")); await b.click("[data-act=revert]");
+  ok(await b.inputValue(`[data-bind="${K}|${DD}.joy"]`) === "폰에서 씀" && await b.inputValue(`[data-bind="${K}|${DD}.comment"]`) === "재시도 시험", "reverted"); ok(await b.locator(".ubar").count() === 0, "bar gone");
+  await settle(); ok((await b.evaluate(([k, d]) => window.__store[k][d], [K, DD])).joy === "폰에서 씀", "saved reverted");
 });
 await t("B07 노션에서 고친 일기를 [노션에서 가져오기]로 받아옴, 이 기기에서 아직 노션 저장 안 한 날은 덮어쓰지 않음", async () => {
   const other = DD === "01" ? "02" : "01", od = `${M}-${other}`, other2 = DD === "03" ? "04" : "03", od2 = `${M}-${other2}`;
@@ -416,13 +435,22 @@ await t("B08 [전부 만들기]: 올해 1월 1일~2027년 말 모든 날짜·월
   const months = []; for (let d = new Date(y0, 0, 1); d <= end; d.setMonth(d.getMonth() + 1)) months.push(ymd(d).slice(0, 7));
   const mon = new Date(y0, 0, 1); mon.setDate(1 - ((mon.getDay() + 6) % 7)); const weeks = []; for (let d = new Date(mon); d <= end; d.setDate(d.getDate() + 7)) weeks.push(ymd(d));
   const map = await b.evaluate(() => window.__store.nmap);
-  ok(days.every(d => map["d:" + d]) && months.every(m => map["m:" + m]) && weeks.every(w => map["w:" + w]), "every page mapped");
+  ok(days.every(d => map["d:" + d] && map["hl:" + d]) && months.every(m => map["m:" + m]) && weeks.every(w => map["w:" + w]), "every page mapped");
+  ok((await b.textContent(".page.r .set")).includes(`Diary ${days.length}`), "page counts shown");
   const D = await dsIds(); const pre = ["d:" + T, `d:${M}-${DD === "01" ? "02" : "01"}`].filter(k => k);
   const diaryTitles = c.filter(x => x.i.parent.data_source_id === D.diary).flatMap(x => x.i.pages.map(p => p.properties.Title));
   ok(new Set(diaryTitles).size === diaryTitles.length && !diaryTitles.includes(T), "no duplicates, existing day skipped");
   const want = days.filter(d => !preMap["d:" + d]).length; ok(diaryTitles.length === want, `diary ${diaryTitles.length} vs ${want}`); ok(c.every(x => x.i.pages.length <= 50), "≤50 per call");
   ok(new Set(Object.values(map)).size === Object.keys(map).length, "unique page ids");
   const b2 = (await calls()).length; await b.click("[data-act=nall]"); await b.waitForTimeout(250); ok((await calls()).slice(b2).filter(x => x.t === "notion-create-pages").length === 0, "resume creates nothing");
+});
+await t("B08b 연간 Goal: 노션 페이지가 없는 달은 '페이지 없음 [만들기]', 누르면 그 달 Planner 페이지 생성", async () => {
+  await btab("year"); ok(await b.locator("[data-act=mkm]").count() === 0, "this year all made");
+  await b.click("[data-act=nav][data-n='1']"); await b.click("[data-act=nav][data-n='1']"); const y = today.getFullYear() + 2;
+  if (y > 2027) { ok(await b.locator("[data-act=mkm]").count() === 12, "12 missing"); const before = (await calls()).length; await b.locator("[data-act=mkm]").first().click(); await b.waitForTimeout(300);
+    const c = (await calls()).slice(before).filter(x => x.t === "notion-create-pages"); ok(c.length === 1 && c[0].i.pages[0].properties.Title === `${y}-01`, "Jan page created");
+    ok(await b.locator("[data-act=mkm]").count() === 11 && await b.locator(`[data-add="m-${y}-01|goals"]`).count() === 1, "Jan now takes goals"); }
+  await b.click("[data-act=today]");
 });
 await t("B09 월간 목표·체크·기간기록 → Planner(Month) 같은 페이지로 자동 반영", async () => {
   await btab("month"); await b.fill(`[data-add="m-${M}|goals"]`, "책 2권"); await b.press(`[data-add="m-${M}|goals"]`, "Enter");
@@ -439,14 +467,14 @@ await t("B11 습관 생성·수정→Habits, 체크·해제→Habit Log(개수 �
   await btab("habit"); await b.fill("[data-addhabit]", "스트레칭"); await b.press("[data-addhabit]", "Enter"); await b.click(`.hg td.c[data-ds="${T}"]`); await b.waitForTimeout(3200);
   const D = await dsIds(); let c = await calls();
   ok(lastProps(c, x => x.how === "create" && x.parent?.data_source_id === D.habits && x.p.Name === "스트레칭" && x.p.On === "__YES__"), "habits row");
-  ok(lastProps(c, x => x.how === "create" && x.parent?.data_source_id === D.habitlog && x.p.Done === "스트레칭" && x.p.Count === 1), "log row");
-  await b.locator(".hl", { hasText: "스트레칭" }).click(); await b.fill("#hC", "건강"); await b.click("#hSave"); await b.click(`.hg td.c[data-ds="${T}"]`); await b.waitForTimeout(3200); c = await calls();
+  ok(lastProps(c, x => x.p.Title === T && x.p.Done === "스트레칭" && x.p.Count === 1), "log row");
+  await b.locator(".hl", { hasText: "스트레칭" }).click(); await b.fill("#hC", "건강"); await b.press("#hC", "Enter"); await b.click("[data-act=hback]"); await b.click(`.hg td.c[data-ds="${T}"]`); await b.waitForTimeout(3200); c = await calls();
   ok(lastProps(c, x => x.how === "update" && x.p.Name === "스트레칭" && x.p.Category === "건강"), "habit edit"); ok(lastProps(c, x => x.how === "update" && x.p.Title === T && x.p.Count === 0), "uncheck");
 });
 await t("B12 노트를 만들면 노션 Notes에 바로 들어가고, 본문을 고치면 노션 본문도 바뀜", async () => {
   await btab("notes"); await b.click("[data-act=newnote]"); await b.fill("#nT", "영화 리뷰"); await b.selectOption("#nC", "영화"); await b.click("#nGo"); await b.waitForTimeout(3200);
   const D = await dsIds(); ok(lastProps(await calls(), x => x.how === "create" && x.parent?.data_source_id === D.notes && x.p.Name === "영화 리뷰" && x.p.Category === "영화"), "auto created");
-  await b.fill(".page.r textarea", "장면이 오래 남았다"); await b.waitForTimeout(3200);
+  await b.fill(".dim textarea", "장면이 오래 남았다"); await b.waitForTimeout(3200); await b.click(".dlg [data-close]");
   ok((await calls()).some(x => x.t === "notion-update-page" && x.i.command === "replace_content" && x.i.new_str === "장면이 오래 남았다"), "body synced");
 });
 await t("B07b 노션에서 고친 월·주 목표, 습관 체크, 습관 이름, 노트 제목도 가져옴 — 이 기기에서 아직 안 보낸 곳은 지킴", async () => {
@@ -478,7 +506,7 @@ await t("B13 노션 페이지 갱신 실패: 지워진 페이지면 새로 만�
   ok((await calls()).filter(x => x.t === "notion-create-pages").length === n0 + 1, "recreated");
 });
 await t("B14 구글 캘린더: 연동·캘린더 선택 → 월 단위로 읽어 칸에 표시(다음 쪽까지)", async () => {
-  await btab("setting"); await b.click('[data-act=gcal][data-v="1"]'); await b.waitForSelector("#calSel option >> nth=2", { state: "attached" });
+  await btab("setting"); await b.click('[data-act=stab][data-v="gcal"]'); await b.click('[data-act=gcal][data-v="1"]'); await b.waitForSelector("#calSel option >> nth=2", { state: "attached" });
   await b.selectOption("#calSel", "work@x"); await btab("month"); await b.waitForTimeout(300);
   const w = (await calls()).filter(x => x.watch && x.t === "list_events").at(-1); ok(w.s === "Google Calendar" && w.i.calendarId === "work@x" && w.i.startTime.endsWith("-01T00:00:00"), JSON.stringify(w.i));
   const txt = await b.textContent(`.c[data-ds="${T}"]`); ok(txt.includes("구글 일정") && txt.includes("09:00"), txt); ok(txt.includes("둘째 쪽 일정"), "page 2");
@@ -488,16 +516,16 @@ await t("B15 구글 일정: 시간대 변환(UTC→한국), 여러 날 일정은
   const N2 = ymd(new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1)); const N3 = ymd(new Date(today.getFullYear(), today.getMonth(), today.getDate() + 2));
   await b.evaluate(([T, N3]) => { window.__gev.push({ id: "gz", summary: "UTC 일정", start: { dateTime: T + "T00:30:00Z" }, end: { dateTime: T + "T01:30:00Z" } }, { id: "gm", summary: "여행", start: { date: T }, end: { date: N3 } });
     window.__watch.forEach(w => !w.dead && w.h({ type: "data", result: { payload: { events: window.__gev } } })); }, [T, N3]); await b.waitForTimeout(200);
-  await btab("week"); await btab("day"); const dtxt = await b.textContent(".page.l"); ok(dtxt.includes("09:30") && dtxt.includes("UTC 일정"), "UTC→KST 09:30");
+  await btab("week"); await btab("day"); const dtxt = await b.textContent(".page.r"); ok(dtxt.includes("09:30") && dtxt.includes("UTC 일정"), "UTC→KST 09:30");
   await btab("month"); if (N2.slice(0, 7) === M) ok((await b.textContent(`.c[data-ds="${N2}"]`)).includes("여행"), "multi-day shown on next day");
   ok(!N3.startsWith(M) || !(await b.textContent(`.c[data-ds="${N3}"]`)).includes("여행"), "end date exclusive");
 });
 await t("B16 날짜 눌러 일정 추가 → create_event(선택 캘린더·1시간), 다시 읽어 반영, 구글에서 고치면 반영", async () => {
   await b.click(`.c[data-ds="${T}"]`, { position: { x: 40, y: 70 } }); await b.fill("#evT", "점심 약속"); await b.fill("#evH", "12:30"); await b.click("#evAdd"); await b.waitForTimeout(300);
   const c = (await calls()).filter(x => x.t === "create_event").at(-1); ok(c.i.summary === "점심 약속" && c.i.startTime === `${T}T12:30:00` && c.i.endTime === `${T}T13:30:00` && c.i.calendarId === "work@x", JSON.stringify(c.i));
-  ok((await calls()).some(x => x.t === "invalidate"), "refetch"); await btab("day"); ok((await b.textContent(".page.l")).includes("점심 약속"), "shown");
+  ok((await calls()).some(x => x.t === "invalidate"), "refetch"); await btab("day"); ok((await b.textContent(".page.r")).includes("점심 약속"), "shown");
   await b.evaluate(() => { window.__gev[0].summary = "구글에서 고침"; window.__watch.forEach(w => !w.dead && w.h({ type: "data", result: { payload: { events: window.__gev } } })); });
-  await b.waitForTimeout(150); ok((await b.textContent(".page.l")).includes("구글에서 고침"), "edit in Google reflected"); await btab("month");
+  await b.waitForTimeout(150); ok((await b.textContent(".page.r")).includes("구글에서 고침"), "edit in Google reflected"); await btab("month");
 });
 await t("B16b 구글 일정 고치기·지우기: update_event(같은 일정 번호·선택 캘린더·새 시간) → 반영, delete_event → 사라짐", async () => {
   await b.click(`.c[data-ds="${T}"]`, { position: { x: 40, y: 70 } }); const rows = await b.$$eval(".dim .ck .in", e => e.map(x => x.textContent)); const i = rows.indexOf("구글에서 고침"); ok(i >= 0, rows.join("|"));
@@ -523,7 +551,7 @@ await t("B21 노션 자동 반영 실패: 잠시 뒤 스스로 다시 보내고,
   ok(!(await b.evaluate(() => window.__store.npend || {}))["m:" + M], "cleared");
 });
 await t("B17 아티팩트 사진: assets 저장소에 올리고 주소만 기록, 새로고침 뒤 표시, 노션에는 안 보냄", async () => {
-  await b.click("[data-act=photo]"); const fc = b.waitForEvent("filechooser"); await b.click(`.c[data-ds="${T}"]`, { position: { x: 40, y: 70 } }); await (await fc).setFiles({ name: "a.png", mimeType: "image/png", buffer: PNG }); await b.waitForTimeout(400);
+  await b.click("[data-act=photo]"); const fc = b.waitForEvent("filechooser"); await b.click(`.c[data-ds="${T}"]`, { position: { x: 40, y: 70 } }); await (await fc).setFiles({ name: "a.png", mimeType: "image/png", buffer: PNG }); for (let i = 0; i < 20 && !(await calls()).some(x => x.t === "asset.upload"); i++) await b.waitForTimeout(100); await b.waitForTimeout(300);
   ok((await calls()).some(x => x.t === "asset.upload"), "uploaded"); const p = (await b.evaluate(k => window.__store[k], "p-" + M))[DD]; ok(p.startsWith("data:image/png") && p.length < 400, "url stored, not bytes");
   await breload(); await btab("month"); ok(((await b.getAttribute(`.c[data-ds="${T}"]`, "style")) || "").includes("data:image/png"), "shown after reload");
   ok(!JSON.stringify((await calls()).filter(x => x.s === "Notion")).includes("data:image"), "never sent to Notion"); await b.click("[data-act=photo]");
